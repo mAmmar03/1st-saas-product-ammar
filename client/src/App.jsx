@@ -41,9 +41,10 @@ function MainApp() {
   
   // Synchronize unauthenticated views with browser URL hash & history
   const getInitialUnauthView = () => {
-    const hash = window.location.hash.toLowerCase();
-    if (hash === '#login') return 'login';
-    if (hash === '#founder') return 'founder';
+    const hash = window.location.hash.toLowerCase().replace('#', '');
+    if (hash === 'login') return 'login';
+    if (hash === 'signup' || hash === 'register') return 'signup';
+    if (hash === 'founder') return 'founder';
     return 'landing';
   };
 
@@ -73,22 +74,82 @@ function MainApp() {
     }
   };
 
-  // Listen to browser Back/Forward buttons (popstate)
+  // 1. Dynamic Document Title & Browser Tab Brand Synchronization
   useEffect(() => {
-    const handlePopState = () => {
-      const hash = window.location.hash.toLowerCase();
-      if (hash === '#login') {
-        setUnauthView('login');
-      } else if (hash === '#founder') {
-        setUnauthView('founder');
+    const brand = brandProfile?.brandName || 'Stylish Collection';
+
+    if (!isAuthenticated) {
+      if (unauthView === 'landing') {
+        document.title = 'AmmarDev IRM | Enterprise Luxury PR & Influencer OS';
+      } else if (unauthView === 'founder') {
+        document.title = 'Muhammad Ammar | Founder & Full-Stack Architect';
+      } else if (unauthView === 'signup') {
+        document.title = 'Create Brand Workspace | AmmarDev CRM';
       } else {
-        setUnauthView('landing');
+        document.title = 'Sign In to Workspace | AmmarDev CRM';
+      }
+      return;
+    }
+
+    if (isLocked) {
+      document.title = '🔒 Session Locked | AmmarDev CRM';
+      return;
+    }
+
+    if (previewLanding) {
+      document.title = 'SaaS Overview Preview | AmmarDev IRM';
+      return;
+    }
+
+    const titles = {
+      dashboard: `Dashboard Overview | ${brand} - AmmarDev CRM`,
+      deals: `Campaigns & Deals (SP#) | ${brand}`,
+      schedule: `Reel Scheduling Pipeline | ${brand}`,
+      inventory: `PR Quotas & Apparel Stock | ${brand}`,
+      influencers: `Influencers Directory | ${brand}`,
+      company: `Company Profile & Brand Settings | ${brand}`,
+      alerts: `Schedule Alerts (${alertCount}) | ${brand}`,
+      founder: `Muhammad Ammar | Founder & Architect`,
+    };
+
+    document.title = titles[activeTab] || `Workspace | ${brand}`;
+  }, [activeTab, unauthView, isAuthenticated, isLocked, previewLanding, brandProfile, alertCount]);
+
+  // 2. URL Hash Security Guard & Popstate/Hashchange Synchronization
+  useEffect(() => {
+    const handleUrlSync = () => {
+      const hash = window.location.hash.toLowerCase().replace('#', '');
+
+      if (!isAuthenticated) {
+        if (hash === 'login') {
+          setUnauthView('login');
+        } else if (hash === 'signup' || hash === 'register') {
+          setUnauthView('signup');
+        } else if (hash === 'founder') {
+          setUnauthView('founder');
+        } else {
+          setUnauthView('landing');
+        }
+        return;
+      }
+
+      // If Authenticated
+      const validCrmTabs = ['dashboard', 'deals', 'schedule', 'inventory', 'influencers', 'company', 'alerts', 'founder'];
+      if (validCrmTabs.includes(hash)) {
+        setActiveTab(hash);
+        setPreviewLanding(false);
+      } else if (hash === 'intro' || hash === 'landing') {
+        setPreviewLanding(true);
       }
     };
 
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+    window.addEventListener('popstate', handleUrlSync);
+    window.addEventListener('hashchange', handleUrlSync);
+    return () => {
+      window.removeEventListener('popstate', handleUrlSync);
+      window.removeEventListener('hashchange', handleUrlSync);
+    };
+  }, [isAuthenticated]);
 
   // Modals state
   const [isNewDealOpen, setIsNewDealOpen] = useState(false);
@@ -366,6 +427,7 @@ function MainApp() {
       return (
         <LandingPage
           onEnterLogin={() => navigateUnauth('login')}
+          onEnterSignup={() => navigateUnauth('signup')}
           onOpenFounder={() => navigateUnauth('founder')}
           brandProfile={brandProfile}
         />
@@ -383,6 +445,7 @@ function MainApp() {
     return (
       <LoginScreen
         brandProfile={brandProfile}
+        initialMode={unauthView === 'signup' ? 'signup' : 'login'}
         onBackToLanding={handleBackToLanding}
       />
     );
@@ -433,6 +496,9 @@ function MainApp() {
         setActiveTab={(tab) => {
           if (tab === 'alerts') markAlertsAsRead();
           setActiveTab(tab);
+          try {
+            window.history.pushState(null, '', `#${tab}`);
+          } catch (e) {}
         }}
         brandProfile={brandProfile}
         hasUnreadAlerts={hasUnreadAlerts}
@@ -445,7 +511,10 @@ function MainApp() {
         onOpenBudget={() => setIsBudgetModalOpen(true)}
         onOpenShortcutsGuide={() => setIsShortcutsGuideOpen(true)}
         onLockScreen={lockScreen}
-        onLogout={logout}
+        onLogout={() => {
+          logout();
+          navigateUnauth('login');
+        }}
         onOpenNewDeal={() => setIsNewDealOpen(true)}
         onOpenNewInfluencer={() => setIsNewInfluencerOpen(true)}
         onOpenNewArticle={() => setIsNewArticleOpen(true)}

@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import BrandProfile from '../models/BrandProfile.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'ammardev_master_enterprise_secret_key_2026!';
 
@@ -54,6 +55,97 @@ export const initDefaultUsers = async () => {
     }
   } catch (error) {
     console.error('[Security] Error initializing default accounts:', error);
+  }
+};
+
+// 0. Brand Workspace Registration / Sign-Up Endpoint
+export const register = async (req, res) => {
+  try {
+    const { brandName, name, username, email, password, masterPin } = req.body;
+
+    if (!name || !username || !password) {
+      return res.status(400).json({ error: 'Full name, username, and password are required.' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters long.' });
+    }
+
+    const cleanUsername = username.toLowerCase().trim();
+    if (cleanUsername.length < 3) {
+      return res.status(400).json({ error: 'Username must be at least 3 characters long.' });
+    }
+
+    const existingUser = await User.findOne({ username: cleanUsername });
+    if (existingUser) {
+      return res.status(409).json({ error: `Username "${cleanUsername}" is already registered. Please choose another username or sign in.` });
+    }
+
+    if (email && email.trim()) {
+      const cleanEmail = email.toLowerCase().trim();
+      const existingEmail = await User.findOne({ email: cleanEmail });
+      if (existingEmail) {
+        return res.status(409).json({ error: `Email "${cleanEmail}" is already registered. Please sign in.` });
+      }
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password, salt);
+    const pin = masterPin && String(masterPin).trim() ? String(masterPin).trim() : '9900';
+    const masterPinHash = await bcrypt.hash(pin, salt);
+
+    const newUser = await User.create({
+      username: cleanUsername,
+      name: name.trim(),
+      email: email ? email.toLowerCase().trim() : '',
+      passwordHash,
+      masterPinHash,
+      role: 'super_admin',
+      isActive: true,
+    });
+
+    // Configure brand profile
+    const finalBrandName = brandName && brandName.trim() ? brandName.trim() : `${name.trim()}'s Brand`;
+    const existingBrand = await BrandProfile.findOne();
+    if (existingBrand) {
+      existingBrand.brandName = finalBrandName;
+      if (email) existingBrand.email = email.trim();
+      existingBrand.authorizedSignatory = `${name.trim()} (Super Admin)`;
+      await existingBrand.save();
+    } else {
+      await BrandProfile.create({
+        brandName: finalBrandName,
+        email: email ? email.trim() : 'info@brand.com',
+        authorizedSignatory: `${name.trim()} (Super Admin)`,
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        id: newUser._id,
+        username: newUser.username,
+        role: newUser.role,
+        name: newUser.name,
+      },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.status(201).json({
+      message: 'Brand Workspace created successfully!',
+      token,
+      user: {
+        id: newUser._id,
+        username: newUser.username,
+        name: newUser.name,
+        role: newUser.role,
+        email: newUser.email,
+        permissions: SUPER_ADMIN_PERMISSIONS,
+      },
+    });
+  } catch (error) {
+    console.error('[Registration Error]:', error);
+    res.status(500).json({ error: error.message || 'Failed to create brand workspace.' });
   }
 };
 

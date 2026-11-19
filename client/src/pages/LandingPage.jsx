@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import AmmarDevLogo from '../components/AmmarDevLogo';
 
-export default function LandingPage({ onEnterLogin, onOpenFounder, brandProfile }) {
+export default function LandingPage({ onEnterLogin, onEnterSignup, onOpenFounder, brandProfile }) {
   const [activeFeatureTab, setActiveFeatureTab] = useState('inventory');
   const brandName = brandProfile?.brandName || 'Stylish Collection';
 
@@ -184,7 +184,7 @@ export default function LandingPage({ onEnterLogin, onOpenFounder, brandProfile 
         {/* Dual CTA Buttons */}
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3.5">
           <button
-            onClick={onEnterLogin}
+            onClick={onEnterSignup || onEnterLogin}
             className="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-bold hover:bg-slate-800 transition flex items-center justify-center gap-2.5 shadow-modal active:scale-[0.98]"
           >
             <span>Launch Brand Workspace</span>
@@ -646,7 +646,7 @@ export default function LandingPage({ onEnterLogin, onOpenFounder, brandProfile 
 
           <div className="pt-2">
             <button
-              onClick={onEnterLogin}
+              onClick={onEnterSignup || onEnterLogin}
               className="px-8 py-3.5 rounded-xl bg-white text-slate-900 text-xs sm:text-sm font-bold hover:bg-slate-100 transition shadow-subtle active:scale-[0.98] inline-flex items-center gap-2"
             >
               <span>Access Brand Workspace Now</span>

@@ -101,6 +101,21 @@ export function AuthProvider({ children }) {
     return user;
   };
 
+  const register = async (userData) => {
+    const res = await api.register(userData);
+    const { token: newToken, user } = res.data;
+
+    setToken(newToken);
+    setCurrentUser(user);
+    setIsLocked(false);
+
+    sessionStorage.setItem('ammardev_auth_token', newToken);
+    sessionStorage.setItem('ammardev_current_user', JSON.stringify(user));
+    sessionStorage.removeItem('ammardev_screen_locked');
+
+    return user;
+  };
+
   const logout = () => {
     setToken(null);
     setCurrentUser(null);
@@ -150,6 +165,7 @@ export function AuthProvider({ children }) {
         isLocked,
         loading,
         login,
+        register,
         logout,
         lockScreen,
         unlockScreen,

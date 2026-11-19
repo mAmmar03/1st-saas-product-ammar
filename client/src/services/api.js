@@ -21,6 +21,8 @@ client.interceptors.request.use((config) => {
 export const api = {
   // Authentication & Enterprise Security
   login: (credentials) => client.post('/auth/login', credentials),
+  register: (userData) => client.post('/auth/register', userData),
+  signup: (userData) => client.post('/auth/signup', userData),
   getMe: () => client.get('/auth/me'),
   setSuperAdminPassword: (data) =>
     client.post('/auth/set-superadmin-password', data),

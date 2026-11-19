@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+  register,
   login,
   getMe,
   setSuperAdminPassword,
@@ -13,6 +14,8 @@ import { requireAuth, requireSuperAdmin } from '../middleware/authMiddleware.js'
 const router = express.Router();
 
 // Public auth routes
+router.post('/register', register);
+router.post('/signup', register);
 router.post('/login', login);
 
 // Authenticated user routes
