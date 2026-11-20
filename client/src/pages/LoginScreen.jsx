@@ -65,6 +65,7 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
 
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -177,18 +178,19 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
 
   // Handle Resend Verification Code
   const handleResendCode = async () => {
-    if (resendCooldown > 0) return;
+    if (resendCooldown > 0 || resendLoading) return;
     setError('');
     setSuccess('');
-    setLoading(true);
+    // Start countdown immediately so user receives instant feedback
+    setResendCooldown(60);
+    setResendLoading(true);
     try {
       const res = await resendVerification(verifyEmailAddress);
       setSuccess(res.message || 'A new verification code has been sent to your email.');
-      setResendCooldown(60);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to resend verification code.');
+      setError(err.response?.data?.error || 'Failed to resend verification code. Please check your email.');
     } finally {
-      setLoading(false);
+      setResendLoading(false);
     }
   };
 
@@ -265,8 +267,8 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
   // If System is in Quick Lock mode
   if (isLocked && currentUser) {
     return (
-      <div className="min-h-screen w-screen bg-slate-50 flex items-center justify-center p-4 font-sans select-none animate-backdrop-in">
-        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-modal max-w-md w-full p-8 space-y-6 text-slate-800 animate-modal-in">
+      <div className="min-h-screen w-screen bg-slate-50 flex items-center justify-center p-4 font-sans select-none">
+        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-modal max-w-md w-full p-8 space-y-6 text-slate-800">
           <div className="text-center space-y-2">
             <div className="w-12 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center mx-auto shadow-subtle">
               <Lock className="w-5 h-5 text-slate-100" />
@@ -331,7 +333,7 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
   }
 
   return (
-    <div className="min-h-screen w-screen bg-slate-50/70 flex items-center justify-center p-4 sm:p-6 font-sans select-none animate-backdrop-in relative">
+    <div className="min-h-screen w-screen bg-slate-50/70 flex items-center justify-center p-4 sm:p-6 font-sans select-none relative">
       {/* 1. Top Fixed Back Navigation Button (Desktop & Tablet) */}
       {onBackToLanding && (
         <div className="fixed top-4 left-4 z-50 hidden sm:block">
@@ -347,7 +349,7 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
         </div>
       )}
 
-      <div className="bg-white border border-slate-200/80 rounded-3xl shadow-modal max-w-lg w-full p-6 sm:p-8 space-y-5 text-slate-800 animate-modal-in">
+      <div className="bg-white border border-slate-200/80 rounded-3xl shadow-modal max-w-lg w-full p-6 sm:p-8 space-y-5 text-slate-800">
         {/* Top In-Card Return Header */}
         {onBackToLanding && (
           <div className="flex items-center justify-between pb-2 border-b border-slate-100 text-xs">
@@ -702,11 +704,17 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
               <button
                 type="button"
                 onClick={handleResendCode}
-                disabled={resendCooldown > 0 || loading}
-                className="text-slate-600 hover:text-slate-900 font-semibold flex items-center gap-1 disabled:opacity-40"
+                disabled={resendCooldown > 0 || resendLoading}
+                className="text-slate-600 hover:text-slate-900 font-semibold flex items-center gap-1.5 disabled:opacity-40"
               >
-                <RotateCw className="w-3 h-3" />
-                {resendCooldown > 0 ? `Resend Code in ${resendCooldown}s` : 'Resend Verification Code'}
+                <RotateCw className={`w-3 h-3 ${resendLoading ? 'animate-spin text-slate-900' : ''}`} />
+                <span>
+                  {resendCooldown > 0
+                    ? `Resend Code in ${resendCooldown}s`
+                    : resendLoading
+                    ? 'Sending Code...'
+                    : 'Resend Verification Code'}
+                </span>
               </button>
 
               <button

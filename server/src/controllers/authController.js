@@ -164,11 +164,11 @@ export const register = async (req, res) => {
     });
 
     // 4. Send Verification Email via SMTP
-    await sendVerificationEmail({
+    sendVerificationEmail({
       email: cleanEmail,
       code: verificationCode,
       brandName: finalBrandName,
-    });
+    }).catch((err) => console.error('[Registration Email Async Error]:', err));
 
     res.status(201).json({
       message: `Workspace "${finalBrandName}" created! We sent a 6-digit verification code to ${cleanEmail}.`,
@@ -283,11 +283,11 @@ export const resendVerification = async (req, res) => {
     await user.save();
 
     const brand = await BrandProfile.findOne({ workspaceId: user.workspaceId });
-    await sendVerificationEmail({
+    sendVerificationEmail({
       email: cleanEmail,
       code: newCode,
       brandName: brand?.brandName || 'Brand Workspace',
-    });
+    }).catch((err) => console.error('[Resend Email Async Error]:', err));
 
     res.json({ message: `A new 6-digit verification code has been sent to ${cleanEmail}.` });
   } catch (error) {
@@ -331,11 +331,11 @@ export const login = async (req, res) => {
       await user.save();
 
       const brand = await BrandProfile.findOne({ workspaceId: user.workspaceId });
-      await sendVerificationEmail({
+      sendVerificationEmail({
         email: user.email,
         code,
         brandName: brand?.brandName || 'Brand Workspace',
-      });
+      }).catch((err) => console.error('[Login Verification Email Async Error]:', err));
 
       return res.status(403).json({
         error: 'Your email address is not verified yet. We have sent a 6-digit verification code to your email.',
@@ -406,11 +406,11 @@ export const forgotPassword = async (req, res) => {
     user.resetPasswordExpires = new Date(Date.now() + 15 * 60 * 1000);
     await user.save();
 
-    await sendPasswordResetEmail({
+    sendPasswordResetEmail({
       email: cleanEmail,
       code: resetCode,
       name: user.name,
-    });
+    }).catch((err) => console.error('[Password Reset Email Async Error]:', err));
 
     res.json({
       message: `A 6-digit password reset code has been sent to ${cleanEmail}.`,

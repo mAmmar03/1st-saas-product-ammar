@@ -1,10 +1,21 @@
 import axios from 'axios';
 
 const getApiBase = () => {
-  const envUrl = (import.meta.env.VITE_API_URL || '').trim();
+  let envUrl = (import.meta.env.VITE_API_URL || '').trim();
+
+  // 1. Sanitize double protocol typos (e.g. https://https:// or http://https://)
+  if (envUrl) {
+    envUrl = envUrl.replace(/^(https?:\/\/)+/i, 'https://');
+  }
+
+  // 2. Production fallback if env variable is missing or empty on Vercel
   if (!envUrl) {
+    if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      return 'https://onest-saas-product-ammar.onrender.com/api';
+    }
     return 'http://localhost:5000/api';
   }
+
   const clean = envUrl.replace(/\/+$/, '');
   if (clean.endsWith('/api')) {
     return clean;

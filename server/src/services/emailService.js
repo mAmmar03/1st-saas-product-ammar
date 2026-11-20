@@ -1,5 +1,8 @@
 import nodemailer from 'nodemailer';
 
+const defaultSmtpUser = Buffer.from('YW1tYXJkZXYwM0BnbWFpbC5jb20=', 'base64').toString('utf8'); // ammardev03@gmail.com
+const defaultSmtpPass = Buffer.from('ZHRuZ3RiYXpwYW95enZ1dQ==', 'base64').toString('utf8'); // dtngtbazpaoyzvuu
+
 /**
  * Configure Nodemailer Transport
  * Supports custom SMTP settings via .env:
@@ -7,8 +10,8 @@ import nodemailer from 'nodemailer';
  */
 const createTransporter = () => {
   const host = process.env.SMTP_HOST || 'smtp.gmail.com';
-  const user = process.env.SMTP_USER;
-  const pass = (process.env.SMTP_PASS || '').replace(/\s+/g, '');
+  const user = process.env.SMTP_USER || defaultSmtpUser;
+  const pass = (process.env.SMTP_PASS || defaultSmtpPass).replace(/\s+/g, '');
 
   if (!user || !pass) {
     return null; // SMTP not fully configured
@@ -40,7 +43,8 @@ const createTransporter = () => {
 };
 
 const getFromAddress = () => {
-  return process.env.SMTP_FROM || `"AmmarDev Luxury CRM" <${process.env.SMTP_USER || 'no-reply@ammardev.com'}>`;
+  const sender = process.env.SMTP_USER || defaultSmtpUser;
+  return process.env.SMTP_FROM || `"AmmarDev Luxury CRM" <${sender}>`;
 };
 
 /**
