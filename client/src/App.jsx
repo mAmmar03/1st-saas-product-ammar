@@ -75,48 +75,7 @@ function MainApp() {
     }
   };
 
-  // 1. Dynamic Document Title & Browser Tab Brand Synchronization
-  useEffect(() => {
-    const brand = brandProfile?.brandName || 'Stylish Collection';
-
-    if (!isAuthenticated) {
-      if (unauthView === 'landing') {
-        document.title = 'AmmarDev IRM | Enterprise Luxury PR & Influencer OS';
-      } else if (unauthView === 'founder') {
-        document.title = 'Muhammad Ammar | Founder & Full-Stack Architect';
-      } else if (unauthView === 'signup') {
-        document.title = 'Create Brand Workspace | AmmarDev CRM';
-      } else {
-        document.title = 'Sign In to Workspace | AmmarDev CRM';
-      }
-      return;
-    }
-
-    if (isLocked) {
-      document.title = '🔒 Session Locked | AmmarDev CRM';
-      return;
-    }
-
-    if (previewLanding) {
-      document.title = 'SaaS Overview Preview | AmmarDev IRM';
-      return;
-    }
-
-    const titles = {
-      dashboard: `Dashboard Overview | ${brand} - AmmarDev CRM`,
-      deals: `Campaigns & Deals (SP#) | ${brand}`,
-      schedule: `Reel Scheduling Pipeline | ${brand}`,
-      inventory: `PR Quotas & Apparel Stock | ${brand}`,
-      influencers: `Influencers Directory | ${brand}`,
-      company: `Company Profile & Brand Settings | ${brand}`,
-      alerts: `Schedule Alerts (${alertCount}) | ${brand}`,
-      founder: `Muhammad Ammar | Founder & Architect`,
-    };
-
-    document.title = titles[activeTab] || `Workspace | ${brand}`;
-  }, [activeTab, unauthView, isAuthenticated, isLocked, previewLanding, brandProfile, alertCount]);
-
-  // 2. URL Hash Security Guard & Popstate/Hashchange Synchronization
+  // 1. URL Hash Security Guard & Popstate/Hashchange Synchronization
   useEffect(() => {
     const handleUrlSync = () => {
       const hash = window.location.hash.toLowerCase().replace('#', '');
@@ -380,6 +339,47 @@ function MainApp() {
 
   const alertCount = activeAlertsList.length;
   const hasUnreadAlerts = alertCount > 0 && lastSeenAlerts < Date.now() - 60000;
+
+  // Dynamic Document Title & Browser Tab Brand Synchronization
+  useEffect(() => {
+    const brand = brandProfile?.brandName || 'Stylish Collection';
+
+    if (!isAuthenticated) {
+      if (unauthView === 'landing') {
+        document.title = 'AmmarDev IRM | Enterprise Luxury PR & Influencer OS';
+      } else if (unauthView === 'founder') {
+        document.title = 'Muhammad Ammar | Founder & Full-Stack Architect';
+      } else if (unauthView === 'signup') {
+        document.title = 'Create Brand Workspace | AmmarDev CRM';
+      } else {
+        document.title = 'Sign In to Workspace | AmmarDev CRM';
+      }
+      return;
+    }
+
+    if (isLocked) {
+      document.title = '🔒 Session Locked | AmmarDev CRM';
+      return;
+    }
+
+    if (previewLanding) {
+      document.title = 'SaaS Overview Preview | AmmarDev IRM';
+      return;
+    }
+
+    const titles = {
+      dashboard: `Dashboard Overview | ${brand} - AmmarDev CRM`,
+      deals: `Campaigns & Deals (SP#) | ${brand}`,
+      schedule: `Reel Scheduling Pipeline | ${brand}`,
+      inventory: `PR Quotas & Apparel Stock | ${brand}`,
+      influencers: `Influencers Directory | ${brand}`,
+      company: `Company Profile & Brand Settings | ${brand}`,
+      alerts: `Schedule Alerts (${alertCount}) | ${brand}`,
+      founder: `Muhammad Ammar | Founder & Architect`,
+    };
+
+    document.title = titles[activeTab] || `Workspace | ${brand}`;
+  }, [activeTab, unauthView, isAuthenticated, isLocked, previewLanding, brandProfile, alertCount]);
 
   const markAlertsAsRead = () => {
     const nowTs = Date.now();
@@ -888,15 +888,60 @@ function MainApp() {
   );
 }
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('Application Error Boundary caught error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen w-screen bg-slate-50 flex items-center justify-center p-4 font-sans text-slate-800">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-modal max-w-md w-full p-6 text-center space-y-4">
+            <div className="w-12 h-12 bg-slate-100 text-slate-700 rounded-full flex items-center justify-center mx-auto">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <h2 className="text-base font-bold text-slate-900">AmmarDev CRM Workspace</h2>
+            <p className="text-xs text-slate-500">
+              The application encountered a temporary display glitch.
+            </p>
+            <button
+              onClick={() => {
+                sessionStorage.clear();
+                window.location.href = window.location.origin;
+              }}
+              className="px-4 py-2 bg-slate-900 text-white text-xs font-semibold rounded-lg hover:bg-slate-800 transition shadow-subtle"
+            >
+              Reload Workspace
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function App() {
   return (
-    <AlertProvider>
-      <AuthProvider>
-        <RoleProvider>
-          <EnterprisePreloader />
-          <MainApp />
-        </RoleProvider>
-      </AuthProvider>
-    </AlertProvider>
+    <ErrorBoundary>
+      <AlertProvider>
+        <AuthProvider>
+          <RoleProvider>
+            <EnterprisePreloader />
+            <MainApp />
+          </RoleProvider>
+        </AuthProvider>
+      </AlertProvider>
+    </ErrorBoundary>
   );
 }
