@@ -6,12 +6,23 @@ import nodemailer from 'nodemailer';
  * SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM, SMTP_SECURE
  */
 const createTransporter = () => {
-  const host = process.env.SMTP_HOST;
+  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
   const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
+  const pass = (process.env.SMTP_PASS || '').replace(/\s+/g, '');
 
-  if (!host || !user || !pass) {
+  if (!user || !pass) {
     return null; // SMTP not fully configured
+  }
+
+  // Optimize for Gmail service
+  if (host.includes('gmail') || (user && user.includes('@gmail.com'))) {
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user,
+        pass,
+      },
+    });
   }
 
   const port = parseInt(process.env.SMTP_PORT || '587', 10);
