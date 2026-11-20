@@ -190,7 +190,7 @@ export default function CompanyProfile({
             Official Brand Record
           </h3>
 
-          <div className="grid grid-cols-2 gap-4 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
               <span className="text-slate-400 text-[11px] block">Company Name</span>
               <strong className="text-slate-900 text-sm font-semibold">{brandName}</strong>

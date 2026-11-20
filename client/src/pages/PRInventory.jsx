@@ -189,8 +189,8 @@ export default function PRInventory({ onOpenNewArticle, onOpenDossier }) {
                   </div>
 
                   {/* Stock Quota Metrics */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-5">
-                    <div className="flex items-center gap-5 text-center">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5 w-full md:w-auto">
+                    <div className="flex items-center justify-between sm:justify-start gap-4 sm:gap-5 text-center bg-slate-50 sm:bg-transparent p-2.5 sm:p-0 rounded-lg">
                       <div>
                         <span className="text-[10px] uppercase font-medium text-slate-400 block">
                           Quota
@@ -217,34 +217,36 @@ export default function PRInventory({ onOpenNewArticle, onOpenDossier }) {
                       </div>
                     </div>
 
-                    {/* Expand Breakdown Button */}
-                    <button
-                      onClick={() => toggleExpand(art._id)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition ${
-                        isExpanded
-                          ? 'bg-slate-900 text-white border-slate-900 shadow-subtle'
-                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                      }`}
-                    >
-                      <span>
-                        Recipients ({art.dispatchedTo?.length || 0} sent, {art.pendingFor?.length || 0} queued)
-                      </span>
-                      {isExpanded ? (
-                        <ChevronUp className="w-3.5 h-3.5" />
-                      ) : (
-                        <ChevronDown className="w-3.5 h-3.5" />
-                      )}
-                    </button>
-
-                    {hasPermission('canDeleteArticles') && (
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      {/* Expand Breakdown Button */}
                       <button
-                        onClick={() => handleDelete(art._id, art.name)}
-                        className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-slate-50 transition"
-                        title="Delete article"
+                        onClick={() => toggleExpand(art._id)}
+                        className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition ${
+                          isExpanded
+                            ? 'bg-slate-900 text-white border-slate-900 shadow-subtle'
+                            : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                        }`}
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <span className="truncate">
+                          Recipients ({art.dispatchedTo?.length || 0} sent, {art.pendingFor?.length || 0} queued)
+                        </span>
+                        {isExpanded ? (
+                          <ChevronUp className="w-3.5 h-3.5 shrink-0" />
+                        ) : (
+                          <ChevronDown className="w-3.5 h-3.5 shrink-0" />
+                        )}
                       </button>
-                    )}
+
+                      {hasPermission('canDeleteArticles') && (
+                        <button
+                          onClick={() => handleDelete(art._id, art.name)}
+                          className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-slate-50 transition shrink-0"
+                          title="Delete article"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -264,7 +266,7 @@ export default function PRInventory({ onOpenNewArticle, onOpenDossier }) {
                         </p>
                       ) : (
                         <div className="bg-white rounded-xl border border-slate-200/80 overflow-x-auto shadow-xs">
-                          <table className="w-full text-left">
+                          <table className="w-full text-left min-w-[550px]">
                             <thead className="bg-slate-50/70 border-b border-slate-100 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
                               <tr>
                                 <th className="p-2.5">Influencer</th>
@@ -331,7 +333,7 @@ export default function PRInventory({ onOpenNewArticle, onOpenDossier }) {
                         </p>
                       ) : (
                         <div className="bg-white rounded-xl border border-slate-200/80 overflow-x-auto shadow-xs">
-                          <table className="w-full text-left">
+                          <table className="w-full text-left min-w-[550px]">
                             <thead className="bg-slate-50/70 border-b border-slate-100 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
                               <tr>
                                 <th className="p-2.5">Influencer</th>

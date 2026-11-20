@@ -108,7 +108,7 @@ export default function LandingPage({ onEnterLogin, onEnterSignup, onOpenFounder
   return (
     <div className="min-h-screen bg-white text-slate-800 font-sans antialiased selection:bg-slate-900 selection:text-white select-none">
       {/* 1. Top Enterprise Navbar */}
-      <nav className="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-slate-200/80 px-6 lg:px-12 h-16 flex items-center justify-between transition-all">
+      <nav className="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 lg:px-12 h-16 flex items-center justify-between transition-all">
         <div className="flex items-center gap-3">
           <AmmarDevLogo className="w-7 h-7" animated={true} />
           <div className="flex flex-col">
@@ -161,7 +161,7 @@ export default function LandingPage({ onEnterLogin, onEnterSignup, onOpenFounder
       </nav>
 
       {/* 2. Hero Section */}
-      <section className="relative pt-16 pb-20 px-6 lg:px-12 max-w-7xl mx-auto text-center overflow-hidden">
+      <section className="relative pt-12 sm:pt-16 pb-16 sm:pb-20 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto text-center overflow-hidden">
         {/* Soft Background Radial Light */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-slate-100/80 rounded-full blur-3xl -z-10 pointer-events-none" />
 

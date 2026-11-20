@@ -70,9 +70,9 @@ export default function BrandSettingsModal({ isOpen, onClose, onSuccess }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-backdrop-in">
       <div className="bg-white border border-slate-200/80 rounded-2xl shadow-modal max-w-lg w-full max-h-[92vh] flex flex-col overflow-hidden text-xs font-sans animate-modal-in">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-slate-100">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
               <Building2 className="w-5 h-5" />
             </div>
             <div>
@@ -93,7 +93,7 @@ export default function BrandSettingsModal({ isOpen, onClose, onSuccess }) {
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 overflow-y-auto space-y-4">
           {/* Logo Upload - Clean, Unframed Display */}
           <div className="p-4 bg-slate-50/70 rounded-xl border border-slate-100 flex items-center gap-4">
             <div className="h-16 w-24 flex items-center justify-center shrink-0">

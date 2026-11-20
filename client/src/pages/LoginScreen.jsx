@@ -185,13 +185,13 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
 
   return (
     <div className="min-h-screen w-screen bg-slate-50/70 flex items-center justify-center p-4 sm:p-6 font-sans select-none animate-backdrop-in relative">
-      {/* 1. Top Fixed Back Navigation Button */}
+      {/* 1. Top Fixed Back Navigation Button (Desktop & Tablet) */}
       {onBackToLanding && (
-        <div className="fixed top-5 left-5 z-50">
+        <div className="fixed top-4 left-4 z-50 hidden sm:block">
           <button
             type="button"
             onClick={onBackToLanding}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200/90 text-xs font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition shadow-subtle active:scale-[0.98]"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-slate-200/90 text-xs font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition shadow-subtle active:scale-[0.98]"
             title="Return to SaaS Introduction / Landing Page (Press Esc)"
           >
             <ArrowLeft className="w-4 h-4 text-slate-700" />

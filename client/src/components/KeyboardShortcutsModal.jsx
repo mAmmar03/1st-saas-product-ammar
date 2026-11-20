@@ -64,14 +64,14 @@ export default function KeyboardShortcutsModal({ isOpen, onClose, onOpenCommandP
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-backdrop-in font-sans select-none">
       <div className="bg-white rounded-2xl shadow-modal max-w-2xl w-full border border-slate-200/80 overflow-hidden flex flex-col max-h-[88vh] animate-modal-in">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+        <div className="px-4 sm:px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-subtle">
+            <div className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-subtle shrink-0">
               <Keyboard className="w-5 h-5 text-slate-100" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                AmmarDev Keyboard Shortcuts Guide
+              <h2 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                Keyboard Shortcuts Guide
                 <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-200 text-slate-800 font-mono">
                   Hotkeys
                 </span>
@@ -92,7 +92,7 @@ export default function KeyboardShortcutsModal({ isOpen, onClose, onOpenCommandP
         </div>
 
         {/* Shortcuts Body */}
-        <div className="p-6 overflow-y-auto space-y-6 text-xs divide-y divide-slate-100">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-5 sm:space-y-6 text-xs divide-y divide-slate-100">
           {shortcutGroups.map((group, gIdx) => (
             <div key={group.title} className={gIdx > 0 ? 'pt-5' : ''}>
               <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3">

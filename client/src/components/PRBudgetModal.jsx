@@ -106,9 +106,9 @@ export default function PRBudgetModal({ isOpen, onClose }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-backdrop-in">
       <div className="bg-white border border-slate-200/80 rounded-2xl shadow-modal max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden text-xs font-sans animate-modal-in">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-slate-100">
           <div className="flex items-center gap-3">
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${isOverrun ? 'bg-rose-50 text-rose-600' : 'bg-slate-900 text-white'}`}>
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${isOverrun ? 'bg-rose-50 text-rose-600' : 'bg-slate-900 text-white'}`}>
               <DollarSign className="w-5 h-5" />
             </div>
             <div>
@@ -144,14 +144,14 @@ export default function PRBudgetModal({ isOpen, onClose }) {
         </div>
 
         {/* Period Selector Tabs */}
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-2.5 bg-slate-50/50">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 px-4 sm:px-6 py-2.5 bg-slate-50/50 gap-2">
           <div className="flex items-center gap-2">
             <button
               onClick={() => {
                 setActivePeriod('monthly');
                 setIsEditingTarget(false);
               }}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition ${
+              className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-medium transition text-center ${
                 activePeriod === 'monthly'
                   ? 'bg-slate-900 text-white shadow-subtle'
                   : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
@@ -164,7 +164,7 @@ export default function PRBudgetModal({ isOpen, onClose }) {
                 setActivePeriod('weekly');
                 setIsEditingTarget(false);
               }}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition ${
+              className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-medium transition text-center ${
                 activePeriod === 'weekly'
                   ? 'bg-slate-900 text-white shadow-subtle'
                   : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
@@ -183,7 +183,7 @@ export default function PRBudgetModal({ isOpen, onClose }) {
         </div>
 
         {/* Modal Scrollable Body */}
-        <div className="p-6 overflow-y-auto space-y-5">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-5">
           {loading ? (
             <div className="p-12 text-center text-slate-400">
               Loading PR budget analytics...

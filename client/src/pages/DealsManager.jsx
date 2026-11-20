@@ -274,7 +274,7 @@ export default function DealsManager({ onOpenNewDeal, onOpenDossier }) {
           <div className="flex items-center gap-1.5 w-full sm:w-auto bg-slate-100 p-1 rounded-lg shrink-0">
             <button
               onClick={() => setFilterType('All')}
-              className={`px-3 py-1 text-xs font-semibold rounded-md transition ${
+              className={`flex-1 sm:flex-initial px-3 py-1 text-xs font-semibold rounded-md transition ${
                 filterType === 'All'
                   ? 'bg-white text-slate-900 shadow-xs'
                   : 'text-slate-600 hover:text-slate-950'
@@ -284,29 +284,29 @@ export default function DealsManager({ onOpenNewDeal, onOpenDossier }) {
             </button>
             <button
               onClick={() => setFilterType('Paid Collab')}
-              className={`px-3 py-1 text-xs font-semibold rounded-md transition ${
+              className={`flex-1 sm:flex-initial px-3 py-1 text-xs font-semibold rounded-md transition ${
                 filterType === 'Paid Collab'
                   ? 'bg-emerald-600 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-950'
               }`}
             >
-              Paid Collabs ({paidCount})
+              Paid ({paidCount})
             </button>
             <button
               onClick={() => setFilterType('Barter PR')}
-              className={`px-3 py-1 text-xs font-semibold rounded-md transition ${
+              className={`flex-1 sm:flex-initial px-3 py-1 text-xs font-semibold rounded-md transition ${
                 filterType === 'Barter PR'
                   ? 'bg-purple-700 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-950'
               }`}
             >
-              Barter PR ({barterCount})
+              Barter ({barterCount})
             </button>
           </div>
         </div>
 
         {/* Status Filter Sub-row */}
-        <div className="flex items-center gap-1.5 pt-1 border-t border-slate-100 text-[11px]">
+        <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-slate-100 text-[11px]">
           <span className="text-slate-400 font-medium mr-1">Status:</span>
           {['All', 'Agreed', 'In Progress', 'Completed'].map((st) => (
             <button
@@ -400,9 +400,9 @@ export default function DealsManager({ onOpenNewDeal, onOpenDossier }) {
                 </div>
 
                 {/* Commercials Box & Top Actions */}
-                <div className="flex items-center gap-3 self-end md:self-auto">
+                <div className="flex items-center flex-wrap gap-2.5 w-full md:w-auto justify-between md:justify-end mt-2 md:mt-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
                   {deal.dealType === 'Barter PR' ? (
-                    <div className="text-right bg-purple-50 px-3 py-1.5 rounded-lg border border-purple-200/70">
+                    <div className="text-left md:text-right bg-purple-50 px-3 py-1.5 rounded-lg border border-purple-200/70">
                       <span className="text-[10px] uppercase font-bold text-purple-700 block">
                         Barter PR Exchange
                       </span>
@@ -411,8 +411,8 @@ export default function DealsManager({ onOpenNewDeal, onOpenDossier }) {
                       </span>
                     </div>
                   ) : (
-                    <>
-                      <div className="text-right">
+                    <div className="flex items-center gap-3">
+                      <div>
                         <span className="text-[10px] uppercase font-semibold text-slate-400 block">
                           Agreed Total
                         </span>
@@ -421,7 +421,7 @@ export default function DealsManager({ onOpenNewDeal, onOpenDossier }) {
                         </span>
                       </div>
 
-                      <div className="text-right border-l border-slate-200 pl-3">
+                      <div className="border-l border-slate-200 pl-3">
                         <span className="text-[10px] uppercase font-semibold text-slate-400 block">
                           Rate / Video
                         </span>
@@ -429,35 +429,38 @@ export default function DealsManager({ onOpenNewDeal, onOpenDossier }) {
                           Rs. {deal.ratePerVideo?.toLocaleString()}
                         </span>
                       </div>
-                    </>
+                    </div>
                   )}
 
-                  {/* Payment Voucher / Slip Button */}
-                  <button
-                    onClick={() => setReceiptModalDeal(deal)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition active:scale-[0.98] shadow-subtle"
-                    title={deal.dealType === 'Barter PR' ? 'View Barter PR Consignment Voucher' : 'View payment voucher and slip'}
-                  >
-                    <Receipt className="w-3.5 h-3.5" />
-                    {deal.dealType === 'Barter PR' ? 'Consignment Slip' : 'Payment Slip'}
-                  </button>
-
-                  <button
-                    onClick={() => onOpenDossier(deal.influencer?._id)}
-                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 transition"
-                  >
-                    Bio-Data
-                  </button>
-
-                  {(hasPermission('canDeleteRecords') || hasPermission('canDeleteDeals') || isSuperAdmin) && (
+                  <div className="flex items-center gap-1.5 ml-auto md:ml-0">
+                    {/* Payment Voucher / Slip Button */}
                     <button
-                      onClick={() => handleDeleteDeal(deal._id)}
-                      className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-slate-100 transition"
-                      title="Delete deal"
+                      onClick={() => setReceiptModalDeal(deal)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition active:scale-[0.98] shadow-subtle"
+                      title={deal.dealType === 'Barter PR' ? 'View Barter PR Consignment Voucher' : 'View payment voucher and slip'}
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Receipt className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">{deal.dealType === 'Barter PR' ? 'Consignment Slip' : 'Payment Slip'}</span>
+                      <span className="sm:hidden">Slip</span>
                     </button>
-                  )}
+
+                    <button
+                      onClick={() => onOpenDossier(deal.influencer?._id)}
+                      className="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 transition"
+                    >
+                      Bio-Data
+                    </button>
+
+                    {(hasPermission('canDeleteRecords') || hasPermission('canDeleteDeals') || isSuperAdmin) && (
+                      <button
+                        onClick={() => handleDeleteDeal(deal._id)}
+                        className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-slate-100 transition"
+                        title="Delete deal"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
 

@@ -131,9 +131,9 @@ Thank you for collaborating with ${brandName}!`;
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-backdrop-in">
       <div className="bg-white border border-slate-200/80 rounded-2xl shadow-modal max-w-2xl w-full max-h-[94vh] flex flex-col overflow-hidden text-xs font-sans animate-modal-in">
         {/* Header Bar (Hidden on print) */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 print:hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-6 py-4 border-b border-slate-100 gap-2 print:hidden">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
               <FileText className="w-4 h-4" />
             </div>
             <div>
@@ -144,25 +144,25 @@ Thank you for collaborating with ${brandName}!`;
               </h3>
               <p className="text-xs text-slate-400">
                 {deal.dealType === 'Barter PR'
-                  ? 'Generate printable A4 consignment slip or copy WhatsApp summary (Nil Commercial Consideration)'
+                  ? 'Generate printable A4 consignment slip or copy WhatsApp summary'
                   : 'Generate printable A4 receipt or copy WhatsApp summary'}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition"
+            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition self-end sm:self-auto"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Printable Receipt Body */}
-        <div className="p-6 overflow-y-auto space-y-5" ref={receiptRef}>
+        <div className="p-3 sm:p-6 overflow-y-auto space-y-4 sm:space-y-5" ref={receiptRef}>
           {/* Slip Document Container formatted for A4 */}
           <div
             id="payment-voucher-print-area"
-            className="border border-slate-200/90 rounded-xl p-6 bg-white space-y-4 max-w-[210mm] mx-auto text-slate-900 shadow-xs"
+            className="border border-slate-200/90 rounded-xl p-4 sm:p-6 bg-white space-y-4 max-w-[210mm] mx-auto text-slate-900 shadow-xs"
           >
             {/* Slip Top Header with Brand Logo */}
             <div className="flex items-start justify-between border-b-2 border-zinc-900 pb-3">
@@ -431,11 +431,11 @@ Thank you for collaborating with ${brandName}!`;
         </div>
 
         {/* Footer Actions (Hidden on Print) */}
-        <div className="px-5 py-3 border-t border-zinc-200 bg-zinc-50 flex flex-wrap items-center justify-between gap-2 print:hidden font-mono">
-          <div className="flex items-center gap-2">
+        <div className="px-4 sm:px-5 py-3 border-t border-zinc-200 bg-zinc-50 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 print:hidden font-mono">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <button
               onClick={handleCopyWhatsAppText}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-white border border-zinc-300 hover:bg-zinc-100 text-zinc-800 transition"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold uppercase tracking-wider bg-white border border-zinc-300 hover:bg-zinc-100 text-zinc-800 transition"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
               {copied ? 'Copied WhatsApp Text!' : 'Copy For WhatsApp'}
@@ -443,7 +443,7 @@ Thank you for collaborating with ${brandName}!`;
 
             <button
               onClick={handlePrint}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-zinc-900 text-white hover:bg-zinc-800 transition shadow-sm"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold uppercase tracking-wider bg-zinc-900 text-white hover:bg-zinc-800 transition shadow-sm"
             >
               <Printer className="w-3.5 h-3.5" />
               Print A4 Settlement Slip
@@ -452,7 +452,7 @@ Thank you for collaborating with ${brandName}!`;
 
           <button
             onClick={onClose}
-            className="px-4 py-1.5 text-xs font-semibold uppercase text-zinc-600 hover:text-zinc-900"
+            className="px-4 py-2 text-xs font-semibold uppercase text-zinc-600 hover:text-zinc-900 text-center"
           >
             Close
           </button>

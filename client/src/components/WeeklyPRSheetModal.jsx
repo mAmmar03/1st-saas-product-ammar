@@ -88,9 +88,9 @@ export default function WeeklyPRSheetModal({ isOpen, onClose }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-backdrop-in">
       <div className="bg-white border border-slate-200/80 rounded-2xl max-w-4xl w-full max-h-[94vh] flex flex-col overflow-hidden shadow-modal text-xs font-sans animate-modal-in">
         {/* Top Control Bar (Hidden on print) */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 print:hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-6 py-4 border-b border-slate-100 gap-3 print:hidden">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
               <FileSpreadsheet className="w-4 h-4" />
             </div>
             <div>
@@ -103,7 +103,7 @@ export default function WeeklyPRSheetModal({ isOpen, onClose }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <select
               value={filterPeriod}
               onChange={(e) => setFilterPeriod(e.target.value)}
@@ -133,30 +133,30 @@ export default function WeeklyPRSheetModal({ isOpen, onClose }) {
         </div>
 
         {/* Scrollable Preview and Printable Container */}
-        <div className="p-6 overflow-y-auto" ref={sheetRef}>
+        <div className="p-3 sm:p-6 overflow-y-auto" ref={sheetRef}>
           {/* Printable Sheet */}
           <div
             id="weekly-pr-print-area"
-            className="border border-slate-200/90 rounded-xl p-8 bg-white space-y-6 max-w-[210mm] mx-auto text-slate-900 shadow-xs"
+            className="border border-slate-200/90 rounded-xl p-4 sm:p-8 bg-white space-y-6 max-w-[210mm] mx-auto text-slate-900 shadow-xs"
           >
             {/* Sheet Header */}
-            <div className="flex items-start justify-between border-b-2 border-zinc-900 pb-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b-2 border-zinc-900 pb-4 gap-3">
               <div className="flex items-center gap-3">
                 {brandProfile?.brandLogo ? (
                   <img
                     src={brandProfile.brandLogo}
                     alt={brandProfile.brandName}
-                    className="h-12 w-auto max-w-[120px] object-contain"
+                    className="h-10 sm:h-12 w-auto max-w-[120px] object-contain"
                   />
                 ) : (
                   <img
                     src="/logo-main.png"
                     alt="AmmarDev"
-                    className="h-10 w-auto max-w-[120px] object-contain"
+                    className="h-9 sm:h-10 w-auto max-w-[120px] object-contain"
                   />
                 )}
                 <div>
-                  <h1 className="text-lg font-black uppercase tracking-tight text-zinc-900">
+                  <h1 className="text-base sm:text-lg font-black uppercase tracking-tight text-zinc-900">
                     {brandProfile?.brandName || 'Stylish Collection'}
                   </h1>
                   <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">
@@ -165,11 +165,11 @@ export default function WeeklyPRSheetModal({ isOpen, onClose }) {
                 </div>
               </div>
 
-              <div className="text-right font-mono">
+              <div className="text-left sm:text-right font-mono">
                 <span className="text-[10px] font-bold text-zinc-500 uppercase block">
                   DOCUMENT TYPE
                 </span>
-                <span className="text-sm font-bold text-zinc-900 uppercase">
+                <span className="text-xs sm:text-sm font-bold text-zinc-900 uppercase">
                   WEEKLY PR AUDIT SHEET
                 </span>
                 <span className="block text-[10px] text-zinc-500 mt-0.5">
@@ -179,28 +179,28 @@ export default function WeeklyPRSheetModal({ isOpen, onClose }) {
             </div>
 
             {/* Summary Highlights */}
-            <div className="grid grid-cols-4 gap-3 bg-zinc-50 p-4 border border-zinc-200 font-mono">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-zinc-50 p-3 sm:p-4 border border-zinc-200 font-mono">
               <div>
                 <span className="text-[10px] uppercase text-zinc-500 block">Total PR Sent</span>
-                <span className="text-sm font-bold text-zinc-900">{totalDressesSent} Pieces</span>
+                <span className="text-xs sm:text-sm font-bold text-zinc-900">{totalDressesSent} Pieces</span>
               </div>
               <div>
                 <span className="text-[10px] uppercase text-zinc-500 block">Creators Engaged</span>
-                <span className="text-sm font-bold text-zinc-900">{filteredDeals.length} Influencers</span>
+                <span className="text-xs sm:text-sm font-bold text-zinc-900">{filteredDeals.length} Influencers</span>
               </div>
               <div>
                 <span className="text-[10px] uppercase text-zinc-500 block">Agreed Budget</span>
-                <span className="text-sm font-bold text-zinc-900">Rs. {totalAgreedBudget.toLocaleString()}</span>
+                <span className="text-xs sm:text-sm font-bold text-zinc-900">Rs. {totalAgreedBudget.toLocaleString()}</span>
               </div>
               <div>
                 <span className="text-[10px] uppercase text-zinc-500 block">Total Paid (Expense)</span>
-                <span className="text-sm font-bold text-zinc-900">Rs. {totalPaidAmount.toLocaleString()}</span>
+                <span className="text-xs sm:text-sm font-bold text-zinc-900">Rs. {totalPaidAmount.toLocaleString()}</span>
               </div>
             </div>
 
             {/* Main Ledger Table */}
-            <div>
-              <table className="w-full text-left border-collapse border border-zinc-300 text-[11px]">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse border border-zinc-300 text-[11px] min-w-[650px]">
                 <thead>
                   <tr className="bg-zinc-900 text-white font-mono uppercase text-[9px] tracking-wider">
                     <th className="p-2 border border-zinc-700">SP#</th>

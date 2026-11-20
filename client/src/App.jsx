@@ -31,13 +31,14 @@ import { AlertProvider } from './context/AlertContext';
 import { RoleProvider, useRole } from './context/RoleContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { api } from './services/api';
-import { Bell, Building2, Printer, ShieldCheck, Lock, KeyRound, LogOut, DollarSign, Search, Keyboard, Command, ArrowRight } from 'lucide-react';
+import { Bell, Building2, Printer, ShieldCheck, Lock, KeyRound, LogOut, DollarSign, Search, Keyboard, Command, ArrowRight, Menu } from 'lucide-react';
 
 function MainApp() {
   const { isAuthenticated, isLocked, currentUser, isSuperAdmin, lockScreen, logout, loading: authLoading } = useAuth();
   const { hasPermission } = useRole();
 
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Synchronize unauthenticated views with browser URL hash & history
   const getInitialUnauthView = () => {
@@ -490,10 +491,13 @@ function MainApp() {
 
   return (
     <div className="h-screen w-screen overflow-hidden flex bg-slate-50 text-slate-800 font-sans antialiased">
-      {/* 1. Left Fixed Sidebar */}
+      {/* 1. Left Responsive Sidebar (Off-canvas Drawer on Mobile/Tablet, Static on Desktop) */}
       <Sidebar
+        isOpenMobile={isMobileMenuOpen}
+        onCloseMobile={() => setIsMobileMenuOpen(false)}
         activeTab={activeTab}
         setActiveTab={(tab) => {
+          setIsMobileMenuOpen(false);
           if (tab === 'alerts') markAlertsAsRead();
           setActiveTab(tab);
           try {
@@ -524,47 +528,64 @@ function MainApp() {
 
       {/* 2. Main Area (Only This Area Scrolls Smoothly) */}
       <div className="flex-1 h-screen flex flex-col min-w-0 overflow-hidden">
-        {/* Top Header Bar - Modern Unframed SaaS Header */}
-        <header className="h-14 shrink-0 bg-white border-b border-slate-200/80 px-6 flex items-center justify-between text-xs font-sans shadow-subtle z-10">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <AmmarDevLogo className="w-5 h-5" />
-              <span className="font-bold tracking-tight text-slate-900 text-xs hidden sm:inline">
+        {/* Top Header Bar - Modern Responsive SaaS Header */}
+        <header className="h-14 shrink-0 bg-white border-b border-slate-200/80 px-3 sm:px-6 flex items-center justify-between text-xs font-sans shadow-subtle z-10">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            {/* Hamburger Mobile Menu Toggle */}
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="p-1.5 -ml-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg lg:hidden transition shrink-0"
+              title="Open Navigation Menu"
+              aria-label="Open Navigation Menu"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <AmmarDevLogo className="w-5 h-5 shrink-0" />
+              <span className="font-bold tracking-tight text-slate-900 text-xs hidden md:inline">
                 AmmarDev Influencer CRM
+              </span>
+              <span className="font-bold tracking-tight text-slate-900 text-xs hidden sm:inline md:hidden">
+                AmmarDev
               </span>
             </div>
 
             <span className="text-slate-200 hidden sm:inline">/</span>
 
-            {/* Client Company Badge - Pure Unframed Brand Display */}
+            {/* Client Company Badge */}
             <button
-              onClick={() => setActiveTab('company')}
-              className="flex items-center gap-2 px-2.5 py-1 rounded-lg hover:bg-slate-100 transition group"
+              onClick={() => {
+                setActiveTab('company');
+                setIsMobileMenuOpen(false);
+              }}
+              className="flex items-center gap-1.5 sm:gap-2 px-2 py-1 rounded-lg hover:bg-slate-100 transition group min-w-0"
               title="Click to view Company Profile"
             >
               {brandProfile?.brandLogo ? (
                 <img
                   src={brandProfile.brandLogo}
                   alt={brandProfile.brandName}
-                  className="h-5 w-auto max-w-[85px] object-contain shrink-0"
+                  className="h-4 sm:h-5 w-auto max-w-[65px] sm:max-w-[85px] object-contain shrink-0"
                 />
               ) : (
-                <Building2 className="w-4 h-4 text-slate-400 group-hover:text-slate-700" />
+                <Building2 className="w-4 h-4 text-slate-400 group-hover:text-slate-700 shrink-0" />
               )}
-              <span className="font-semibold text-xs text-slate-800 group-hover:text-slate-900">
+              <span className="font-semibold text-xs text-slate-800 group-hover:text-slate-900 truncate max-w-[100px] sm:max-w-[140px] md:max-w-[180px]">
                 {brandProfile?.brandName || 'Stylish Collection'}
               </span>
             </button>
           </div>
 
-          {/* Quick Command Palette Spotlight Trigger */}
+          {/* Quick Command Palette Spotlight Trigger (Desktop & Tablet) */}
           <button
             onClick={() => setIsCommandPaletteOpen(true)}
-            className="hidden sm:flex items-center gap-2.5 px-3 py-1.5 rounded-lg border border-slate-200/90 bg-slate-50/70 hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition text-xs select-none shadow-2xs"
+            className="hidden md:flex items-center gap-2.5 px-3 py-1.5 rounded-lg border border-slate-200/90 bg-slate-50/70 hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition text-xs select-none shadow-2xs"
             title="Press Ctrl+Space or Ctrl+K for quick commands"
           >
             <Search className="w-3.5 h-3.5 text-slate-400" />
-            <span className="font-medium text-slate-500">Quick Commands & Search...</span>
+            <span className="font-medium text-slate-500 hidden lg:inline">Quick Commands & Search...</span>
+            <span className="font-medium text-slate-500 lg:hidden">Search...</span>
             <div className="flex items-center gap-1">
               <kbd className="px-1.5 py-0.2 rounded bg-white border border-slate-200 text-[10px] font-mono font-bold text-slate-500 shadow-xs">
                 Ctrl
@@ -577,42 +598,52 @@ function MainApp() {
           </button>
 
           {/* Right Header Controls */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* Mobile Quick Search Button */}
+            <button
+              onClick={() => setIsCommandPaletteOpen(true)}
+              className="md:hidden p-1.5 rounded-md bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 transition"
+              title="Search & Quick Commands"
+            >
+              <Search className="w-3.5 h-3.5" />
+            </button>
+
             {/* Keyboard Shortcuts Guide Button */}
             <button
               onClick={() => setIsShortcutsGuideOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 transition font-medium"
+              className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 transition font-medium"
               title="Keyboard Shortcuts Guide (Press ?)"
             >
               <Keyboard className="w-3.5 h-3.5 text-slate-600" />
-              <span className="hidden lg:inline text-xs font-semibold">Hotkeys</span>
-              <kbd className="hidden sm:inline px-1 py-0.2 rounded bg-slate-100 border border-slate-300 text-[9px] font-mono font-bold text-slate-600">
+              <span className="text-xs font-semibold">Hotkeys</span>
+              <kbd className="px-1 py-0.2 rounded bg-slate-100 border border-slate-300 text-[9px] font-mono font-bold text-slate-600">
                 ?
               </kbd>
             </button>
+
             {/* PR Budget Controller Quick Button */}
             {(hasPermission('canAccessBudget') || isSuperAdmin) && (
               <button
                 onClick={() => setIsBudgetModalOpen(true)}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border transition font-medium ${
+                className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-md border transition font-medium ${
                   isBudgetOverrun
                     ? 'bg-rose-50 border-rose-300 text-rose-700 animate-pulse'
                     : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
                 }`}
                 title="PR Budget Controller & Financial Tracking"
               >
-                <DollarSign className={`w-3.5 h-3.5 ${isBudgetOverrun ? 'text-rose-600' : 'text-emerald-600'}`} />
-                <span className="hidden md:inline font-semibold">
+                <DollarSign className={`w-3.5 h-3.5 shrink-0 ${isBudgetOverrun ? 'text-rose-600' : 'text-emerald-600'}`} />
+                <span className="hidden xl:inline font-semibold">
                   {isBudgetOverrun ? 'Budget Overrun!' : 'PR Budget'}
                 </span>
               </button>
             )}
 
             {/* Super Admin / Staff Badge */}
-            <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-slate-100/70 text-xs text-slate-700">
+            <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-md bg-slate-100/70 text-xs text-slate-700">
               <span className={`w-2 h-2 rounded-full ${isSuperAdmin ? 'bg-emerald-500' : 'bg-blue-500'}`}></span>
-              <span className="font-medium text-slate-800">
-                {currentUser?.name || (isSuperAdmin ? 'Super Admin (Ammar)' : 'Staff Member')}
+              <span className="font-medium text-slate-800 max-w-[110px] truncate">
+                {currentUser?.name || (isSuperAdmin ? 'Super Admin' : 'Staff')}
               </span>
             </div>
 
@@ -620,11 +651,11 @@ function MainApp() {
             {isSuperAdmin && (
               <button
                 onClick={() => setIsSecurityCenterOpen(true)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 transition font-medium"
+                className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 transition font-medium"
                 title="Super Admin Security & Password Management"
               >
                 <KeyRound className="w-3.5 h-3.5 text-slate-700" />
-                <span className="hidden md:inline">Staff & Security</span>
+                <span className="hidden xl:inline">Security</span>
               </button>
             )}
 
@@ -655,10 +686,10 @@ function MainApp() {
             {/* Weekly PR Sheet */}
             <button
               onClick={() => setIsWeeklySheetOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition shadow-subtle active:scale-[0.98]"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition shadow-subtle active:scale-[0.98]"
             >
               <Printer className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Weekly Sheet</span>
+              <span className="hidden md:inline">Weekly Sheet</span>
             </button>
 
             {/* Sign Out */}
@@ -673,7 +704,7 @@ function MainApp() {
         </header>
 
         {/* Scrollable Dynamic Main Content */}
-        <main className="flex-1 overflow-y-auto p-6 md:p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 overflow-y-auto p-3.5 sm:p-5 md:p-6 lg:p-8 max-w-7xl w-full mx-auto">
           {activeTab === 'dashboard' && (
             <Dashboard
               key={refreshKey}

@@ -39,9 +39,9 @@ export default function ScheduleReelModal({ deal, videoItem, onClose, onSuccess 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-backdrop-in">
       <div className="bg-white border border-slate-200/80 rounded-2xl shadow-modal max-w-md w-full overflow-hidden text-xs font-sans animate-modal-in">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
               <Video className="w-4 h-4" />
             </div>
             <div>
@@ -61,7 +61,7 @@ export default function ScheduleReelModal({ deal, videoItem, onClose, onSuccess 
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
           {/* Creator & Parcel context */}
           <div className="p-3.5 bg-slate-50/70 rounded-xl border border-slate-100 space-y-1 text-xs">
             <p className="text-slate-700">Creator: <strong className="font-semibold text-slate-900">{deal.influencer?.name}</strong> ({deal.influencer?.instagramHandle})</p>

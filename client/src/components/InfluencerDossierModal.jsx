@@ -79,9 +79,9 @@ export default function InfluencerDossierModal({ influencerId, onClose, onRefres
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-backdrop-in">
       <div className="bg-white border border-slate-200/80 rounded-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden shadow-modal text-xs font-sans animate-modal-in">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
               <FileText className="w-4 h-4" />
             </div>
             <div>
@@ -109,9 +109,9 @@ export default function InfluencerDossierModal({ influencerId, onClose, onRefres
         ) : !data ? (
           <div className="p-10 text-center text-slate-400 text-xs">Profile record not found.</div>
         ) : (
-          <div className="p-6 overflow-y-auto space-y-6">
+          <div className="p-4 sm:p-6 overflow-y-auto space-y-5 sm:space-y-6">
             {/* Top Influencer Profile Card */}
-            <div className="p-5 rounded-xl border border-slate-200/80 bg-slate-50/70 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="p-4 sm:p-5 rounded-xl border border-slate-200/80 bg-slate-50/70 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="relative group w-16 h-16 rounded-full overflow-hidden bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-xs">
                   {data.profile.profileImage ? (
@@ -235,7 +235,7 @@ export default function InfluencerDossierModal({ influencerId, onClose, onRefres
                 </div>
               ) : (
                 <div className="border border-zinc-200 overflow-x-auto">
-                  <table className="w-full text-left text-xs font-sans">
+                  <table className="w-full text-left text-xs font-sans min-w-[500px]">
                     <thead className="bg-zinc-50 border-b border-zinc-200 uppercase text-[10px] font-bold text-zinc-600 font-mono">
                       <tr>
                         <th className="p-2.5">Article Name & SKU</th>

@@ -71,12 +71,12 @@ export default function Dashboard({ setActiveTab, onOpenNewDeal, onOpenDossier }
   return (
     <div className="space-y-6 animate-fade-in font-sans">
       {/* Top Banner - Soft, Modern Unlisted Trade SaaS Style */}
-      <div className="p-6 bg-white rounded-2xl border border-slate-200/80 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-subtle">
+      <div className="p-4 sm:p-6 bg-white rounded-2xl border border-slate-200/80 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-subtle">
         <div>
           <span className="text-[11px] font-semibold text-slate-400 block mb-1">
             Overview Hub
           </span>
-          <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             Influencer Collaborations & PR Operations
           </h1>
           <p className="text-slate-500 text-xs mt-0.5">
@@ -84,16 +84,16 @@ export default function Dashboard({ setActiveTab, onOpenNewDeal, onOpenDossier }
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center flex-wrap gap-2.5">
           <button
             onClick={() => setActiveTab('inventory')}
-            className="px-3.5 py-2 text-xs font-medium rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition shadow-xs active:scale-[0.98]"
+            className="flex-1 sm:flex-initial px-3.5 py-2 text-xs font-medium rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition shadow-xs active:scale-[0.98] text-center"
           >
             Check PR Stock
           </button>
           <button
             onClick={onOpenNewDeal}
-            className="px-4 py-2 text-xs font-semibold rounded-lg bg-slate-900 hover:bg-slate-800 text-white transition flex items-center gap-1.5 shadow-subtle active:scale-[0.98]"
+            className="flex-1 sm:flex-initial px-4 py-2 text-xs font-semibold rounded-lg bg-slate-900 hover:bg-slate-800 text-white transition flex items-center justify-center gap-1.5 shadow-subtle active:scale-[0.98]"
           >
             <Plus className="w-3.5 h-3.5" />
             New Collab
@@ -293,8 +293,8 @@ export default function Dashboard({ setActiveTab, onOpenNewDeal, onOpenDossier }
               No collaborations entered yet. Click "New Collab" in the sidebar to add!
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            <div className="overflow-x-auto -mx-5 px-5 sm:mx-0 sm:px-0">
+              <table className="w-full text-left text-xs min-w-[550px]">
                 <thead className="bg-slate-50/70 border-b border-slate-100 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
                   <tr>
                     <th className="p-2.5">SP# & Influencer</th>
