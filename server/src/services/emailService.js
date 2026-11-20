@@ -4,9 +4,7 @@ const defaultSmtpUser = Buffer.from('YW1tYXJkZXYwM0BnbWFpbC5jb20=', 'base64').to
 const defaultSmtpPass = Buffer.from('ZHRuZ3RiYXpwYW95enZ1dQ==', 'base64').toString('utf8'); // dtngtbazpaoyzvuu
 
 /**
- * Configure Nodemailer Transport
- * Supports custom SMTP settings via .env:
- * SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM, SMTP_SECURE
+ * Configure Nodemailer Transport with fast connection timeouts (prevents hanging on blocked ports)
  */
 const createTransporter = () => {
   const host = process.env.SMTP_HOST || 'smtp.gmail.com';
@@ -14,10 +12,10 @@ const createTransporter = () => {
   const pass = (process.env.SMTP_PASS || defaultSmtpPass).replace(/\s+/g, '');
 
   if (!user || !pass) {
-    return null; // SMTP not fully configured
+    return null;
   }
 
-  // Optimize for Gmail service
+  // Optimize for Gmail service with fast timeouts
   if (host.includes('gmail') || (user && user.includes('@gmail.com'))) {
     return nodemailer.createTransport({
       service: 'gmail',
@@ -25,6 +23,9 @@ const createTransporter = () => {
         user,
         pass,
       },
+      connectionTimeout: 4000,
+      greetingTimeout: 4000,
+      socketTimeout: 5000,
     });
   }
 
@@ -39,12 +40,101 @@ const createTransporter = () => {
       user,
       pass,
     },
+    connectionTimeout: 4000,
+    greetingTimeout: 4000,
+    socketTimeout: 5000,
   });
 };
 
 const getFromAddress = () => {
   const sender = process.env.SMTP_USER || defaultSmtpUser;
   return process.env.SMTP_FROM || `"AmmarDev Luxury CRM" <${sender}>`;
+};
+
+/**
+ * Universal Email Dispatcher
+ * Priority:
+ * 1. Brevo HTTP REST API (Port 443 - 100% works on Render without SMTP restrictions)
+ * 2. Resend HTTP REST API (Port 443)
+ * 3. Nodemailer SMTP (Fast 4s timeout)
+ */
+const dispatchHtmlEmail = async ({ to, subject, html }) => {
+  const senderEmail = process.env.SMTP_USER || defaultSmtpUser;
+
+  // 1. Brevo HTTP API (Port 443 HTTPS - Free 300 emails/day, no credit card required)
+  if (process.env.BREVO_API_KEY) {
+    try {
+      const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'api-key': process.env.BREVO_API_KEY,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          sender: { name: 'AmmarDev Luxury CRM', email: senderEmail },
+          to: [{ email: to }],
+          subject,
+          htmlContent: html,
+        }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        console.log(`[Email Service] ✅ Sent via Brevo HTTP API to ${to}:`, data.messageId || 'Delivered');
+        return { sent: true, provider: 'brevo', messageId: data.messageId };
+      }
+      console.warn('[Email Service] Brevo API responded with error:', data);
+    } catch (err) {
+      console.error('[Email Service] Brevo fetch error:', err.message);
+    }
+  }
+
+  // 2. Resend HTTP API (Port 443 HTTPS)
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: process.env.RESEND_FROM || 'AmmarDev CRM <onboarding@resend.dev>',
+          to: [to],
+          subject,
+          html,
+        }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        console.log(`[Email Service] ✅ Sent via Resend HTTP API to ${to}:`, data.id);
+        return { sent: true, provider: 'resend', messageId: data.id };
+      }
+      console.warn('[Email Service] Resend API responded with error:', data);
+    } catch (err) {
+      console.error('[Email Service] Resend fetch error:', err.message);
+    }
+  }
+
+  // 3. Fallback: Nodemailer SMTP
+  const transporter = createTransporter();
+  if (transporter) {
+    try {
+      const info = await transporter.sendMail({
+        from: getFromAddress(),
+        to,
+        subject,
+        html,
+      });
+      console.log(`[Email Service] ✅ Sent via SMTP to ${to}:`, info.messageId);
+      return { sent: true, provider: 'smtp', messageId: info.messageId };
+    } catch (err) {
+      console.warn(`[Email Service Notice]: SMTP send to ${to} failed (likely cloud port 465/587 blocked):`, err.message);
+      return { sent: false, error: err.message, simulated: true };
+    }
+  }
+
+  return { sent: false, simulated: true };
 };
 
 /**
@@ -90,19 +180,11 @@ export const sendVerificationEmail = async ({ email, code, brandName = 'Brand Wo
     </div>
   `;
 
-  try {
-    const info = await transporter.sendMail({
-      from: getFromAddress(),
-      to: email,
-      subject: `${code} is your AmmarDev CRM Verification Code for ${brandName}`,
-      html,
-    });
-    console.log('[Email Service] Email sent successfully:', info.messageId);
-    return { sent: true, simulated: false, messageId: info.messageId };
-  } catch (err) {
-    console.error('[Email Service Error]: Failed to send verification email via SMTP:', err.message);
-    return { sent: false, error: err.message, simulated: true, code };
-  }
+  return await dispatchHtmlEmail({
+    to: email,
+    subject: `${code} is your AmmarDev CRM Verification Code for ${brandName}`,
+    html,
+  });
 };
 
 /**
@@ -148,17 +230,9 @@ export const sendPasswordResetEmail = async ({ email, code, name = 'User' }) => 
     </div>
   `;
 
-  try {
-    const info = await transporter.sendMail({
-      from: getFromAddress(),
-      to: email,
-      subject: `${code} is your AmmarDev CRM Password Reset Code`,
-      html,
-    });
-    console.log('[Email Service] Reset email sent successfully:', info.messageId);
-    return { sent: true, simulated: false, messageId: info.messageId };
-  } catch (err) {
-    console.error('[Email Service Error]: Failed to send reset email via SMTP:', err.message);
-    return { sent: false, error: err.message, simulated: true, code };
-  }
+  return await dispatchHtmlEmail({
+    to: email,
+    subject: `${code} is your AmmarDev CRM Password Reset Code`,
+    html,
+  });
 };
