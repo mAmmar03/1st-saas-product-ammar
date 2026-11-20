@@ -2,6 +2,12 @@ import mongoose from 'mongoose';
 
 const articleSchema = new mongoose.Schema(
   {
+    workspaceId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Workspace',
+      index: true,
+      default: null,
+    },
     name: {
       type: String,
       required: [true, 'Article name is required'],
@@ -10,7 +16,6 @@ const articleSchema = new mongoose.Schema(
     articleCode: {
       type: String,
       required: [true, 'Article code/SKU is required'],
-      unique: true,
       trim: true,
       uppercase: true,
     },
@@ -52,5 +57,8 @@ articleSchema.pre('save', function (next) {
   this.remainingPieces = Math.max(0, this.totalPRQuota - this.sentPieces);
   next();
 });
+
+// Compound unique index per workspace
+articleSchema.index({ workspaceId: 1, articleCode: 1 });
 
 export default mongoose.model('Article', articleSchema);

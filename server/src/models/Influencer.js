@@ -2,6 +2,12 @@ import mongoose from 'mongoose';
 
 const influencerSchema = new mongoose.Schema(
   {
+    workspaceId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Workspace',
+      index: true,
+      default: null,
+    },
     name: {
       type: String,
       required: [true, 'Influencer name is required'],

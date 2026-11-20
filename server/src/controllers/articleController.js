@@ -1,15 +1,18 @@
 import Article from '../models/Article.js';
 import Deal from '../models/Deal.js';
 
-// Get all articles sorted in ascending order (1, 2, 3, 4 - newly added at bottom)
+// Get all articles sorted in ascending order (Scoped to current workspace)
 export const getArticles = async (req, res) => {
   try {
-    const articles = await Article.find().sort({ createdAt: 1 });
+    const articles = await Article.find({ workspaceId: req.user.workspaceId }).sort({ createdAt: 1 });
 
-    // For each article, aggregate recipients from deals
+    // For each article, aggregate recipients from deals in this workspace
     const articlesWithBreakdown = await Promise.all(
       articles.map(async (art) => {
-        const deals = await Deal.find({ 'prArticles.article': art._id })
+        const deals = await Deal.find({
+          workspaceId: req.user.workspaceId,
+          'prArticles.article': art._id,
+        })
           .populate('influencer', 'name instagramHandle phone city shippingAddress preferredSize')
           .select('campaignName prArticles influencer agreedDate spNumber');
 
@@ -57,18 +60,25 @@ export const getArticles = async (req, res) => {
   }
 };
 
-// Create new article
+// Create new article (Scoped to current workspace)
 export const createArticle = async (req, res) => {
   try {
     const { name, articleCode, totalPRQuota, category, unitCost, notes } = req.body;
-    const existing = await Article.findOne({ articleCode: articleCode.toUpperCase() });
+    const cleanCode = articleCode.toUpperCase().trim();
+
+    const existing = await Article.findOne({
+      workspaceId: req.user.workspaceId,
+      articleCode: cleanCode,
+    });
+
     if (existing) {
-      return res.status(400).json({ error: 'Article with this code already exists' });
+      return res.status(400).json({ error: `Article with code "${cleanCode}" already exists in your workspace` });
     }
 
     const article = new Article({
+      workspaceId: req.user.workspaceId,
       name,
-      articleCode: articleCode.toUpperCase(),
+      articleCode: cleanCode,
       category: category || 'General',
       totalPRQuota: Number(totalPRQuota),
       sentPieces: 0,
@@ -84,11 +94,14 @@ export const createArticle = async (req, res) => {
   }
 };
 
-// Update article quota or details
+// Update article quota or details (Scoped to current workspace)
 export const updateArticle = async (req, res) => {
   try {
-    const article = await Article.findById(req.params.id);
-    if (!article) return res.status(404).json({ error: 'Article not found' });
+    const article = await Article.findOne({
+      _id: req.params.id,
+      workspaceId: req.user.workspaceId,
+    });
+    if (!article) return res.status(404).json({ error: 'Article not found in your workspace' });
 
     if (req.body.totalPRQuota !== undefined) {
       if (Number(req.body.totalPRQuota) < article.sentPieces) {
@@ -113,11 +126,14 @@ export const updateArticle = async (req, res) => {
   }
 };
 
-// Delete article
+// Delete article (Scoped to current workspace)
 export const deleteArticle = async (req, res) => {
   try {
-    const article = await Article.findByIdAndDelete(req.params.id);
-    if (!article) return res.status(404).json({ error: 'Article not found' });
+    const article = await Article.findOneAndDelete({
+      _id: req.params.id,
+      workspaceId: req.user.workspaceId,
+    });
+    if (!article) return res.status(404).json({ error: 'Article not found in your workspace' });
     res.json({ message: 'Article deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });

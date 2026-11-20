@@ -14,14 +14,28 @@ import {
   ShieldCheck,
   Mail,
   Sparkles,
+  Key,
+  RotateCw,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import AmmarDevLogo from '../components/AmmarDevLogo';
 
 export default function LoginScreen({ brandProfile, onBackToLanding, initialMode = 'login' }) {
-  const { login, register, isLocked, currentUser, unlockScreen, logout } = useAuth();
+  const {
+    login,
+    register,
+    verifyEmail,
+    resendVerification,
+    forgotPassword,
+    resetPassword,
+    isLocked,
+    currentUser,
+    unlockScreen,
+    logout,
+  } = useAuth();
 
-  const [mode, setMode] = useState(initialMode); // 'login' | 'signup'
+  // 'login' | 'signup' | 'verify' | 'forgot' | 'reset'
+  const [mode, setMode] = useState(initialMode);
 
   // Login Fields
   const [username, setUsername] = useState('');
@@ -37,6 +51,18 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
   const [signupPassword, setSignupPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [signupPin, setSignupPin] = useState('9900');
+
+  // Email Verification Fields
+  const [verifyEmailAddress, setVerifyEmailAddress] = useState('');
+  const [verifyCode, setVerifyCode] = useState('');
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  // Forgot / Reset Password Fields
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [resetEmailAddress, setResetEmailAddress] = useState('');
+  const [resetCode, setResetCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -54,6 +80,15 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onBackToLanding]);
 
+  // Handle resend countdown
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
   // Handle Sign In
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -63,7 +98,14 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
     try {
       await login(username, password);
     } catch (err) {
-      setError(err.response?.data?.error || 'Invalid credentials. Access Denied.');
+      const data = err.response?.data;
+      if (data?.requiresVerification && data?.email) {
+        setVerifyEmailAddress(data.email);
+        setMode('verify');
+        setError(data.error || 'Please verify your email address to activate your workspace.');
+      } else {
+        setError(data?.error || 'Invalid credentials. Access Denied.');
+      }
     } finally {
       setLoading(false);
     }
@@ -87,7 +129,7 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
 
     setLoading(true);
     try {
-      await register({
+      const res = await register({
         brandName: brandName || 'Stylish Collection',
         name: fullName,
         username: signupUsername,
@@ -95,9 +137,114 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
         password: signupPassword,
         masterPin: signupPin || '9900',
       });
-      setSuccess('Brand Workspace created successfully! Redirecting...');
+
+      if (res?.requiresVerification) {
+        setVerifyEmailAddress(signupEmail);
+        setMode('verify');
+        setSuccess(res.message || 'Workspace created! Enter the 6-digit verification code sent to your email.');
+        setResendCooldown(60);
+      } else {
+        setSuccess('Brand Workspace created successfully! Redirecting...');
+      }
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle Email Verification Code Submit
+  const handleVerify = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (!verifyCode || verifyCode.trim().length !== 6) {
+      setError('Please enter the 6-digit verification code.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await verifyEmail(verifyEmailAddress, verifyCode.trim());
+      setSuccess('Email verified successfully! Workspace unlocked.');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Verification failed. Please check the code and try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle Resend Verification Code
+  const handleResendCode = async () => {
+    if (resendCooldown > 0) return;
+    setError('');
+    setSuccess('');
+    setLoading(true);
+    try {
+      const res = await resendVerification(verifyEmailAddress);
+      setSuccess(res.message || 'A new verification code has been sent to your email.');
+      setResendCooldown(60);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to resend verification code.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle Forgot Password Request
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (!forgotEmail || !forgotEmail.trim()) {
+      setError('Please enter your registered email address.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await forgotPassword(forgotEmail.trim());
+      setResetEmailAddress(forgotEmail.trim());
+      setMode('reset');
+      setSuccess(res.message || 'A 6-digit reset code has been sent to your email.');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to request password reset.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle Reset Password Submit
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (newPassword !== confirmNewPassword) {
+      setError('Passwords do not match. Please verify your new password.');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setError('New password must be at least 6 characters long.');
+      return;
+    }
+
+    if (!resetCode || resetCode.trim().length !== 6) {
+      setError('Please enter the 6-digit reset code sent to your email.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await resetPassword(resetEmailAddress, resetCode.trim(), newPassword);
+      setMode('login');
+      setSuccess(res.message || 'Password reset successfully! Please sign in with your new password.');
+      setPassword('');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to reset password. Please check your code.');
     } finally {
       setLoading(false);
     }
@@ -229,48 +376,52 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
               Ammar<span className="text-slate-500 font-semibold">Dev</span> Influencer CRM
             </h1>
             <p className="text-xs text-slate-500 mt-0.5">
-              {mode === 'signup'
-                ? 'Create New Brand Workspace & Super Admin Credentials'
-                : 'Enterprise Security & Workspace Management Portal'}
+              {mode === 'signup' && 'Create New Brand Workspace & Super Admin Credentials'}
+              {mode === 'login' && 'Enterprise Security & Workspace Management Portal'}
+              {mode === 'verify' && 'Verify Your Email Address to Activate Workspace'}
+              {mode === 'forgot' && 'Reset Workspace Account Password'}
+              {mode === 'reset' && 'Set a New Account Password'}
             </p>
           </div>
         </div>
 
-        {/* Auth Mode Switcher Tab */}
-        <div className="flex rounded-xl bg-slate-100 p-1 text-xs font-semibold">
-          <button
-            type="button"
-            onClick={() => {
-              setMode('signup');
-              setError('');
-              setSuccess('');
-            }}
-            className={`flex-1 py-2 rounded-lg transition flex items-center justify-center gap-1.5 ${
-              mode === 'signup'
-                ? 'bg-white text-slate-900 shadow-xs'
-                : 'text-slate-500 hover:text-slate-900'
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5 text-slate-700" />
-            <span>Create Workspace</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setMode('login');
-              setError('');
-              setSuccess('');
-            }}
-            className={`flex-1 py-2 rounded-lg transition flex items-center justify-center gap-1.5 ${
-              mode === 'login'
-                ? 'bg-white text-slate-900 shadow-xs'
-                : 'text-slate-500 hover:text-slate-900'
-            }`}
-          >
-            <Lock className="w-3.5 h-3.5 text-slate-700" />
-            <span>Sign In</span>
-          </button>
-        </div>
+        {/* Auth Mode Switcher Tab (Only on login & signup) */}
+        {(mode === 'login' || mode === 'signup') && (
+          <div className="flex rounded-xl bg-slate-100 p-1 text-xs font-semibold">
+            <button
+              type="button"
+              onClick={() => {
+                setMode('signup');
+                setError('');
+                setSuccess('');
+              }}
+              className={`flex-1 py-2 rounded-lg transition flex items-center justify-center gap-1.5 ${
+                mode === 'signup'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-900'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-slate-700" />
+              <span>Create Workspace</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMode('login');
+                setError('');
+                setSuccess('');
+              }}
+              className={`flex-1 py-2 rounded-lg transition flex items-center justify-center gap-1.5 ${
+                mode === 'login'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-900'
+              }`}
+            >
+              <Lock className="w-3.5 h-3.5 text-slate-700" />
+              <span>Sign In</span>
+            </button>
+          </div>
+        )}
 
         {/* Alerts */}
         {error && (
@@ -336,7 +487,7 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
                   <input
                     type="text"
                     required
-                    placeholder="e.g. ammar or superadmin"
+                    placeholder="e.g. ammar or admin"
                     value={signupUsername}
                     onChange={(e) => setSignupUsername(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none"
@@ -440,7 +591,7 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
           <form onSubmit={handleLogin} className="space-y-4 text-xs">
             <div>
               <label className="block font-semibold text-slate-700 mb-1.5">
-                Username or Account ID
+                Username or Email
               </label>
               <div className="relative">
                 <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -459,6 +610,17 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="block font-semibold text-slate-700">Password</label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('forgot');
+                    setError('');
+                    setSuccess('');
+                  }}
+                  className="text-[11px] font-semibold text-slate-500 hover:text-slate-900 transition hover:underline"
+                >
+                  Forgot Password?
+                </button>
               </div>
               <div className="relative">
                 <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -483,7 +645,7 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
             <div className="flex items-center justify-between pt-1">
               <span className="text-[11px] font-medium text-slate-500 flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5 text-slate-400" />
-                Strict Single-Session Auth
+                Isolated Multi-Tenant Security
               </span>
               <span className="text-[11px] text-slate-400">Super Admin & Staff Gate</span>
             </div>
@@ -512,10 +674,214 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
           </form>
         )}
 
+        {/* ===================== 3. EMAIL VERIFICATION OTP FORM ===================== */}
+        {mode === 'verify' && (
+          <form onSubmit={handleVerify} className="space-y-4 text-xs">
+            <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl text-center space-y-1">
+              <span className="text-[11px] text-slate-500">Verification code sent to</span>
+              <div className="font-bold text-slate-900 text-sm">{verifyEmailAddress}</div>
+            </div>
+
+            <div>
+              <label className="block font-semibold text-slate-700 mb-1.5 text-center">
+                Enter 6-Digit Verification Code
+              </label>
+              <input
+                type="text"
+                required
+                autoFocus
+                maxLength={6}
+                placeholder="123456"
+                value={verifyCode}
+                onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, ''))}
+                className="w-full text-center tracking-[8px] font-mono text-xl py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none transition font-bold"
+              />
+            </div>
+
+            <div className="flex items-center justify-between text-[11px] pt-1">
+              <button
+                type="button"
+                onClick={handleResendCode}
+                disabled={resendCooldown > 0 || loading}
+                className="text-slate-600 hover:text-slate-900 font-semibold flex items-center gap-1 disabled:opacity-40"
+              >
+                <RotateCw className="w-3 h-3" />
+                {resendCooldown > 0 ? `Resend Code in ${resendCooldown}s` : 'Resend Verification Code'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('login');
+                  setError('');
+                }}
+                className="text-slate-400 hover:text-slate-700"
+              >
+                Change Email / Back
+              </button>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading || verifyCode.length !== 6}
+              className="w-full py-2.5 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition flex items-center justify-center gap-2 shadow-subtle active:scale-[0.98] disabled:opacity-50 mt-2"
+            >
+              {loading ? 'Verifying Code...' : 'Verify Email & Open Workspace'}
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </form>
+        )}
+
+        {/* ===================== 4. FORGOT PASSWORD FORM ===================== */}
+        {mode === 'forgot' && (
+          <form onSubmit={handleForgotPassword} className="space-y-4 text-xs">
+            <p className="text-slate-500 text-xs leading-relaxed">
+              Enter your workspace registered email address. We will send you a 6-digit verification code to reset your password.
+            </p>
+
+            <div>
+              <label className="block font-semibold text-slate-700 mb-1.5">
+                Registered Work Email
+              </label>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="email"
+                  required
+                  autoFocus
+                  placeholder="ammar@brand.com"
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none transition"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-2.5 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition flex items-center justify-center gap-2 shadow-subtle active:scale-[0.98] disabled:opacity-50 mt-2"
+            >
+              {loading ? 'Sending Code...' : 'Send Password Reset Code'}
+              <ArrowRight className="w-4 h-4" />
+            </button>
+
+            <div className="text-center pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('login');
+                  setError('');
+                }}
+                className="text-[11px] font-semibold text-slate-500 hover:text-slate-900 transition underline"
+              >
+                ← Back to Sign In
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* ===================== 5. RESET PASSWORD FORM ===================== */}
+        {mode === 'reset' && (
+          <form onSubmit={handleResetPassword} className="space-y-3.5 text-xs">
+            <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl text-center space-y-1">
+              <span className="text-[11px] text-slate-500">Reset code sent to</span>
+              <div className="font-bold text-slate-900 text-sm">{resetEmailAddress}</div>
+            </div>
+
+            <div>
+              <label className="block font-semibold text-slate-700 mb-1">
+                6-Digit Reset Code
+              </label>
+              <div className="relative">
+                <Key className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  required
+                  maxLength={6}
+                  placeholder="123456"
+                  value={resetCode}
+                  onChange={(e) => setResetCode(e.target.value.replace(/\D/g, ''))}
+                  className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 tracking-widest font-mono text-center font-bold focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  New Password (Min 6 chars)
+                </label>
+                <div className="relative">
+                  <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    placeholder="••••••••"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Confirm New Password
+                </label>
+                <div className="relative">
+                  <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    placeholder="••••••••"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-1">
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-[11px] text-slate-500 hover:text-slate-900 flex items-center gap-1 font-medium"
+              >
+                {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                <span>{showPassword ? 'Hide Passwords' : 'Show Passwords'}</span>
+              </button>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-2.5 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition flex items-center justify-center gap-2 shadow-subtle active:scale-[0.98] disabled:opacity-50 mt-2"
+            >
+              {loading ? 'Updating Password...' : 'Save New Password & Sign In'}
+              <ArrowRight className="w-4 h-4" />
+            </button>
+
+            <div className="text-center pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('login');
+                  setError('');
+                }}
+                className="text-[11px] font-semibold text-slate-500 hover:text-slate-900 transition underline"
+              >
+                Cancel and return to Sign In
+              </button>
+            </div>
+          </form>
+        )}
+
         {/* Authentic Enterprise Security Notice */}
         <div className="pt-3 border-t border-slate-100 flex items-center justify-center gap-1.5 text-center text-[10px] text-slate-400">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-          <span>Secured with Bcrypt Encryption, MongoDB Atlas & RBAC Governance</span>
+          <span>Secured with Bcrypt Encryption, MongoDB Atlas & Multi-Tenant Data Isolation</span>
         </div>
       </div>
     </div>

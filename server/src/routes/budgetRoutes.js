@@ -1,20 +1,13 @@
 import express from 'express';
-import {
-  getBudgetOverview,
-  setBudget,
-  deleteBudget,
-} from '../controllers/budgetController.js';
+import { getBudgetOverview, setBudget, deleteBudget } from '../controllers/budgetController.js';
 import { requireAuth, requireSuperAdmin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Get budget overview (authenticated users with permission or super_admin)
-router.get('/', requireAuth, getBudgetOverview);
+router.use(requireAuth);
 
-// Set or update budget (Super Admin ONLY)
-router.post('/', requireAuth, requireSuperAdmin, setBudget);
-
-// Delete budget (Super Admin ONLY)
-router.delete('/:id', requireAuth, requireSuperAdmin, deleteBudget);
+router.get('/', getBudgetOverview);
+router.post('/set', requireSuperAdmin, setBudget);
+router.delete('/:id', requireSuperAdmin, deleteBudget);
 
 export default router;

@@ -35,6 +35,10 @@ export const api = {
   login: (credentials) => client.post('/auth/login', credentials),
   register: (userData) => client.post('/auth/register', userData),
   signup: (userData) => client.post('/auth/signup', userData),
+  verifyEmail: (data) => client.post('/auth/verify-email', data),
+  resendVerification: (data) => client.post('/auth/resend-verification', data),
+  forgotPassword: (data) => client.post('/auth/forgot-password', data),
+  resetPassword: (data) => client.post('/auth/reset-password', data),
   getMe: () => client.get('/auth/me'),
   setSuperAdminPassword: (data) =>
     client.post('/auth/set-superadmin-password', data),

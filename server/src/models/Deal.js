@@ -78,6 +78,12 @@ const videoItemSchema = new mongoose.Schema({
 
 const dealSchema = new mongoose.Schema(
   {
+    workspaceId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Workspace',
+      index: true,
+      default: null,
+    },
     spNumber: {
       type: String,
       trim: true,

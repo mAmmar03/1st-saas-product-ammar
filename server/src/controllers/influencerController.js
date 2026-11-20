@@ -1,27 +1,27 @@
 import Influencer from '../models/Influencer.js';
 import Deal from '../models/Deal.js';
 
-// Get all influencers
+// Get all influencers (Scoped to workspace)
 export const getInfluencers = async (req, res) => {
   try {
-    const influencers = await Influencer.find().sort({ createdAt: -1 });
+    const influencers = await Influencer.find({ workspaceId: req.user.workspaceId }).sort({ createdAt: -1 });
     res.json(influencers);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-// Get influencer dossier / complete bio-data file
+// Get influencer dossier / complete bio-data file (Scoped to workspace)
 export const getInfluencerDossier = async (req, res) => {
   try {
     const { id } = req.params;
-    const influencer = await Influencer.findById(id);
+    const influencer = await Influencer.findOne({ _id: id, workspaceId: req.user.workspaceId });
     if (!influencer) {
-      return res.status(404).json({ error: 'Influencer not found' });
+      return res.status(404).json({ error: 'Influencer not found in your workspace' });
     }
 
-    // Fetch all deals/collaborations of this influencer
-    const deals = await Deal.find({ influencer: id })
+    // Fetch all deals/collaborations of this influencer in this workspace
+    const deals = await Deal.find({ influencer: id, workspaceId: req.user.workspaceId })
       .populate('prArticles.article', 'name articleCode category')
       .sort({ agreedDate: -1 });
 
@@ -93,14 +93,24 @@ export const getInfluencerDossier = async (req, res) => {
   }
 };
 
-// Create new influencer
+// Create new influencer (Scoped to workspace)
 export const createInfluencer = async (req, res) => {
   try {
-    const existing = await Influencer.findOne({ instagramHandle: req.body.instagramHandle });
+    const handle = req.body.instagramHandle ? req.body.instagramHandle.trim().toLowerCase() : '';
+    const existing = await Influencer.findOne({
+      workspaceId: req.user.workspaceId,
+      instagramHandle: { $regex: new RegExp(`^${handle}$`, 'i') },
+    });
+
     if (existing) {
-      return res.status(400).json({ error: 'Influencer with this Instagram handle already exists' });
+      return res.status(400).json({ error: 'An influencer with this handle already exists in your workspace' });
     }
-    const influencer = new Influencer(req.body);
+
+    const influencer = new Influencer({
+      ...req.body,
+      workspaceId: req.user.workspaceId,
+    });
+
     await influencer.save();
     res.status(201).json(influencer);
   } catch (error) {
@@ -108,25 +118,29 @@ export const createInfluencer = async (req, res) => {
   }
 };
 
-// Update influencer
+// Update influencer (Scoped to workspace)
 export const updateInfluencer = async (req, res) => {
   try {
-    const influencer = await Influencer.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-    if (!influencer) return res.status(404).json({ error: 'Influencer not found' });
+    const influencer = await Influencer.findOneAndUpdate(
+      { _id: req.params.id, workspaceId: req.user.workspaceId },
+      req.body,
+      { new: true, runValidators: true }
+    );
+    if (!influencer) return res.status(404).json({ error: 'Influencer not found in your workspace' });
     res.json(influencer);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
 
-// Delete influencer
+// Delete influencer (Scoped to workspace)
 export const deleteInfluencer = async (req, res) => {
   try {
-    const influencer = await Influencer.findByIdAndDelete(req.params.id);
-    if (!influencer) return res.status(404).json({ error: 'Influencer not found' });
+    const influencer = await Influencer.findOneAndDelete({
+      _id: req.params.id,
+      workspaceId: req.user.workspaceId,
+    });
+    if (!influencer) return res.status(404).json({ error: 'Influencer not found in your workspace' });
     res.json({ message: 'Influencer deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });

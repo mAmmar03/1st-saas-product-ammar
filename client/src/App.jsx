@@ -577,26 +577,6 @@ function MainApp() {
             </button>
           </div>
 
-          {/* Quick Command Palette Spotlight Trigger (Desktop & Tablet) */}
-          <button
-            onClick={() => setIsCommandPaletteOpen(true)}
-            className="hidden md:flex items-center gap-2.5 px-3 py-1.5 rounded-lg border border-slate-200/90 bg-slate-50/70 hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition text-xs select-none shadow-2xs"
-            title="Press Ctrl+Space or Ctrl+K for quick commands"
-          >
-            <Search className="w-3.5 h-3.5 text-slate-400" />
-            <span className="font-medium text-slate-500 hidden lg:inline">Quick Commands & Search...</span>
-            <span className="font-medium text-slate-500 lg:hidden">Search...</span>
-            <div className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.2 rounded bg-white border border-slate-200 text-[10px] font-mono font-bold text-slate-500 shadow-xs">
-                Ctrl
-              </kbd>
-              <span className="text-[10px] text-slate-400">+</span>
-              <kbd className="px-1.5 py-0.2 rounded bg-white border border-slate-200 text-[10px] font-mono font-bold text-slate-500 shadow-xs">
-                Space
-              </kbd>
-            </div>
-          </button>
-
           {/* Right Header Controls */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {/* Mobile Quick Search Button */}

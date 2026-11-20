@@ -1,13 +1,16 @@
 import express from 'express';
 import {
   getInfluencers,
-  getInfluencerDossier,
   createInfluencer,
   updateInfluencer,
   deleteInfluencer,
+  getInfluencerDossier,
 } from '../controllers/influencerController.js';
+import { requireAuth } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
+
+router.use(requireAuth);
 
 router.get('/', getInfluencers);
 router.get('/:id/dossier', getInfluencerDossier);

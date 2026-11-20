@@ -2,6 +2,12 @@ import mongoose from 'mongoose';
 
 const prBudgetSchema = new mongoose.Schema(
   {
+    workspaceId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Workspace',
+      index: true,
+      default: null,
+    },
     periodType: {
       type: String,
       enum: ['monthly', 'weekly'],
@@ -11,7 +17,6 @@ const prBudgetSchema = new mongoose.Schema(
     periodKey: {
       type: String,
       required: true,
-      unique: true,
       trim: true,
     },
     periodLabel: {
@@ -35,5 +40,8 @@ const prBudgetSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Compound unique index per workspace
+prBudgetSchema.index({ workspaceId: 1, periodKey: 1 });
 
 export default mongoose.model('PRBudget', prBudgetSchema);

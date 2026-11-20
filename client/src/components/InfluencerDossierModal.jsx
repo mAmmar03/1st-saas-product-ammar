@@ -15,15 +15,18 @@ import {
   Scissors,
   User,
   Camera,
+  Edit,
 } from 'lucide-react';
 import { api } from '../services/api';
 import { useAlert } from '../context/AlertContext';
+import AddInfluencerModal from './AddInfluencerModal';
 
 export default function InfluencerDossierModal({ influencerId, onClose, onRefresh }) {
   const { showAlert } = useAlert();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (influencerId) {
@@ -161,23 +164,35 @@ export default function InfluencerDossierModal({ influencerId, onClose, onRefres
                 </div>
               </div>
 
-              {/* Contact */}
-              <div className="text-xs space-y-1 font-mono text-zinc-700 md:text-right">
-                {data.profile.phone && (
-                  <p className="flex items-center gap-1.5 md:justify-end">
-                    <Phone className="w-3.5 h-3.5 text-zinc-400" /> {data.profile.phone}
-                  </p>
-                )}
-                {data.profile.city && (
-                  <p className="flex items-center gap-1.5 md:justify-end">
-                    <MapPin className="w-3.5 h-3.5 text-zinc-400" /> {data.profile.city}
-                  </p>
-                )}
-                {data.profile.email && (
-                  <p className="flex items-center gap-1.5 md:justify-end">
-                    <Mail className="w-3.5 h-3.5 text-zinc-400" /> {data.profile.email}
-                  </p>
-                )}
+              {/* Contact & Actions */}
+              <div className="text-xs space-y-2 md:text-right">
+                <div className="space-y-1 font-mono text-slate-700">
+                  {data.profile.phone && (
+                    <p className="flex items-center gap-1.5 md:justify-end">
+                      <Phone className="w-3.5 h-3.5 text-slate-400" /> {data.profile.phone}
+                    </p>
+                  )}
+                  {data.profile.city && (
+                    <p className="flex items-center gap-1.5 md:justify-end">
+                      <MapPin className="w-3.5 h-3.5 text-slate-400" /> {data.profile.city}
+                    </p>
+                  )}
+                  {data.profile.email && (
+                    <p className="flex items-center gap-1.5 md:justify-end">
+                      <Mail className="w-3.5 h-3.5 text-slate-400" /> {data.profile.email}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex md:justify-end">
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-800 hover:bg-slate-50 transition text-xs font-semibold shadow-xs"
+                  >
+                    <Edit className="w-3.5 h-3.5 text-slate-500" />
+                    Edit Profile
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -417,6 +432,19 @@ export default function InfluencerDossierModal({ influencerId, onClose, onRefres
           </button>
         </div>
       </div>
+
+      {isEditing && data?.profile && (
+        <AddInfluencerModal
+          isOpen={isEditing}
+          influencerToEdit={data.profile}
+          onClose={() => setIsEditing(false)}
+          onSuccess={() => {
+            setIsEditing(false);
+            loadDossier();
+            if (onRefresh) onRefresh();
+          }}
+        />
+      )}
     </div>
   );
 }

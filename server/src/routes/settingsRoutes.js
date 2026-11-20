@@ -1,9 +1,12 @@
 import express from 'express';
 import { getBrandProfile, updateBrandProfile } from '../controllers/settingsController.js';
+import { requireAuth } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/brand', getBrandProfile);
-router.put('/brand', updateBrandProfile);
+router.use(requireAuth);
+
+router.get('/', getBrandProfile);
+router.put('/', updateBrandProfile);
 
 export default router;

@@ -11,6 +11,7 @@ import authRoutes from './routes/authRoutes.js';
 import budgetRoutes from './routes/budgetRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import { initDefaultUsers } from './controllers/authController.js';
+import { ensureWorkspaceIsolation } from './config/migrateWorkspaces.js';
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ app.get(['/api/health', '/health', '/'], (req, res) => {
 // Connect to DB and Start Server
 connectDB().then(async () => {
   await initDefaultUsers();
+  await ensureWorkspaceIsolation();
   app.listen(PORT, () => {
     console.log(`[AmmarDev Server] running on http://localhost:${PORT}`);
   });

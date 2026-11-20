@@ -25,9 +25,10 @@ function getWeekRange(date = new Date()) {
   return { start, end };
 }
 
-// 1. Get Budget Overview (Monthly & Weekly + Overrun status + Deals list)
+// 1. Get Budget Overview (Scoped to workspace)
 export const getBudgetOverview = async (req, res) => {
   try {
+    const wsId = req.user.workspaceId;
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonthNum = String(now.getMonth() + 1).padStart(2, '0');
@@ -43,8 +44,8 @@ export const getBudgetOverview = async (req, res) => {
     // Week start & end
     const { start: weekStart, end: weekEnd } = getWeekRange(now);
 
-    // Fetch all deals
-    const allDeals = await Deal.find()
+    // Fetch all deals for this workspace
+    const allDeals = await Deal.find({ workspaceId: wsId })
       .populate('influencer', 'name instagramHandle profileImage')
       .populate('prArticles.article', 'name category prPrice')
       .sort({ agreedDate: -1 });
@@ -87,9 +88,9 @@ export const getBudgetOverview = async (req, res) => {
       }
     });
 
-    // Fetch stored budget records
-    let monthlyBudgetDoc = await PRBudget.findOne({ periodKey: currentMonthKey });
-    let weeklyBudgetDoc = await PRBudget.findOne({ periodKey: currentWeekKey });
+    // Fetch stored budget records for this workspace
+    let monthlyBudgetDoc = await PRBudget.findOne({ workspaceId: wsId, periodKey: currentMonthKey });
+    let weeklyBudgetDoc = await PRBudget.findOne({ workspaceId: wsId, periodKey: currentWeekKey });
 
     const monthNames = [
       'January', 'February', 'March', 'April', 'May', 'June',
@@ -111,8 +112,8 @@ export const getBudgetOverview = async (req, res) => {
     const weekRemaining = Math.max(0, weekAllocated - weekCommittedSpend);
     const weekUtilization = weekAllocated > 0 ? Math.round((weekCommittedSpend / weekAllocated) * 100) : 0;
 
-    // Fetch recent budgets history
-    const history = await PRBudget.find().sort({ createdAt: -1 }).limit(12);
+    // Fetch recent budgets history for this workspace
+    const history = await PRBudget.find({ workspaceId: wsId }).sort({ createdAt: -1 }).limit(12);
 
     res.json({
       monthly: {
@@ -154,9 +155,10 @@ export const getBudgetOverview = async (req, res) => {
   }
 };
 
-// 2. Set or Update Budget (Super Admin Only)
+// 2. Set or Update Budget (Super Admin Only - Scoped to workspace)
 export const setBudget = async (req, res) => {
   try {
+    const wsId = req.user.workspaceId;
     const { periodType, periodKey, periodLabel, allocatedBudget, notes } = req.body;
 
     if (!periodKey || allocatedBudget === undefined) {
@@ -168,11 +170,12 @@ export const setBudget = async (req, res) => {
       return res.status(400).json({ error: 'allocatedBudget must be a non-negative number.' });
     }
 
-    const updatedBy = req.user?.name || 'Super Admin (Ammar)';
+    const updatedBy = req.user?.name || 'Super Admin';
 
     const budget = await PRBudget.findOneAndUpdate(
-      { periodKey },
+      { workspaceId: wsId, periodKey },
       {
+        workspaceId: wsId,
         periodType: periodType || (periodKey.includes('W') ? 'weekly' : 'monthly'),
         periodKey,
         periodLabel: periodLabel || periodKey,
@@ -192,11 +195,11 @@ export const setBudget = async (req, res) => {
   }
 };
 
-// 3. Delete Budget Allocation (Super Admin Only)
+// 3. Delete Budget Allocation (Super Admin Only - Scoped to workspace)
 export const deleteBudget = async (req, res) => {
   try {
     const { id } = req.params;
-    await PRBudget.findByIdAndDelete(id);
+    await PRBudget.findOneAndDelete({ _id: id, workspaceId: req.user.workspaceId });
     res.json({ message: 'Budget target removed successfully.' });
   } catch (error) {
     res.status(500).json({ error: error.message });

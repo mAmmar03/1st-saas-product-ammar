@@ -7,6 +7,7 @@ import {
   Phone,
   FileText,
   Trash2,
+  Edit,
   Scissors,
   Camera,
   User,
@@ -14,6 +15,7 @@ import {
 import { api } from '../services/api';
 import { useAlert } from '../context/AlertContext';
 import { useRole } from '../context/RoleContext';
+import AddInfluencerModal from '../components/AddInfluencerModal';
 
 export default function InfluencersDirectory({ onOpenNewInfluencer, onOpenDossier }) {
   const { showAlert, showConfirm } = useAlert();
@@ -22,6 +24,7 @@ export default function InfluencersDirectory({ onOpenNewInfluencer, onOpenDossie
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [updatingId, setUpdatingId] = useState(null);
+  const [editingInfluencer, setEditingInfluencer] = useState(null);
 
   useEffect(() => {
     loadInfluencers();
@@ -254,19 +257,41 @@ export default function InfluencersDirectory({ onOpenNewInfluencer, onOpenDossie
                   View Collab Dossier
                 </button>
 
-                {hasPermission('canDeleteInfluencers') && (
+                <div className="flex items-center gap-1">
                   <button
-                    onClick={() => handleDelete(inf._id, inf.name)}
-                    className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-slate-50 transition"
-                    title="Delete profile"
+                    onClick={() => setEditingInfluencer(inf)}
+                    className="p-1.5 text-slate-400 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition"
+                    title="Edit creator profile"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Edit className="w-3.5 h-3.5" />
                   </button>
-                )}
+
+                  {hasPermission('canDeleteInfluencers') && (
+                    <button
+                      onClick={() => handleDelete(inf._id, inf.name)}
+                      className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-slate-50 transition"
+                      title="Delete profile"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ))}
         </div>
+      )}
+
+      {editingInfluencer && (
+        <AddInfluencerModal
+          isOpen={Boolean(editingInfluencer)}
+          influencerToEdit={editingInfluencer}
+          onClose={() => setEditingInfluencer(null)}
+          onSuccess={() => {
+            setEditingInfluencer(null);
+            loadInfluencers();
+          }}
+        />
       )}
     </div>
   );

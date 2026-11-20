@@ -19,6 +19,7 @@ export const requireAuth = async (req, res, next) => {
     }
 
     req.user = user;
+    req.workspaceId = user.workspaceId;
     next();
   } catch (error) {
     return res.status(401).json({ error: 'Invalid or expired session token. Please log in again.' });

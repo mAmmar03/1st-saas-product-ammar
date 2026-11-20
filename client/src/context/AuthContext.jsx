@@ -103,6 +103,11 @@ export function AuthProvider({ children }) {
 
   const register = async (userData) => {
     const res = await api.register(userData);
+    return res.data;
+  };
+
+  const verifyEmail = async (email, code) => {
+    const res = await api.verifyEmail({ email, code });
     const { token: newToken, user } = res.data;
 
     setToken(newToken);
@@ -114,6 +119,21 @@ export function AuthProvider({ children }) {
     sessionStorage.removeItem('ammardev_screen_locked');
 
     return user;
+  };
+
+  const resendVerification = async (email) => {
+    const res = await api.resendVerification({ email });
+    return res.data;
+  };
+
+  const forgotPassword = async (email) => {
+    const res = await api.forgotPassword({ email });
+    return res.data;
+  };
+
+  const resetPassword = async (email, code, newPassword) => {
+    const res = await api.resetPassword({ email, code, newPassword });
+    return res.data;
   };
 
   const logout = () => {
@@ -166,6 +186,10 @@ export function AuthProvider({ children }) {
         loading,
         login,
         register,
+        verifyEmail,
+        resendVerification,
+        forgotPassword,
+        resetPassword,
         logout,
         lockScreen,
         unlockScreen,

@@ -1,17 +1,19 @@
 import BrandProfile from '../models/BrandProfile.js';
 
-// Get active Brand / Company Profile
+// Get active Brand / Company Profile (Scoped to workspace)
 export const getBrandProfile = async (req, res) => {
   try {
-    let profile = await BrandProfile.findOne();
+    const wsId = req.user?.workspaceId;
+    let profile = await BrandProfile.findOne({ workspaceId: wsId });
     if (!profile) {
       profile = await BrandProfile.create({
+        workspaceId: wsId,
         brandName: 'Stylish Collection',
         tagline: 'Luxury Pret & Festive Collection',
         phone: '0300 0000000',
         city: 'Lahore, Pakistan',
         instagramHandle: '@stylishcollection',
-        authorizedSignatory: 'Ammar / PR Manager',
+        authorizedSignatory: req.user?.name ? `${req.user.name} (Super Admin)` : 'PR Manager',
       });
     }
     res.json(profile);
@@ -20,14 +22,16 @@ export const getBrandProfile = async (req, res) => {
   }
 };
 
-// Update Brand / Company Profile
+// Update Brand / Company Profile (Scoped to workspace)
 export const updateBrandProfile = async (req, res) => {
   try {
-    let profile = await BrandProfile.findOne();
+    const wsId = req.user?.workspaceId;
+    let profile = await BrandProfile.findOne({ workspaceId: wsId });
     if (!profile) {
-      profile = new BrandProfile(req.body);
+      profile = new BrandProfile({ ...req.body, workspaceId: wsId });
     } else {
       Object.assign(profile, req.body);
+      profile.workspaceId = wsId;
     }
     await profile.save();
     res.json(profile);

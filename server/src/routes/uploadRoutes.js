@@ -1,16 +1,18 @@
 import express from 'express';
 import cloudinary from '../config/cloudinary.js';
+import { requireAuth } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 /**
  * POST /api/upload/image
  * Uploads base64 or remote image to Cloudinary CDN
- * Body: { image: "data:image/...", folder: "ammardev/slips" }
+ * Isolated per workspace in Cloudinary:
+ * ammardev_crm/workspaces/{workspaceId}/{folder}
  */
-router.post('/image', async (req, res) => {
+router.post('/image', requireAuth, async (req, res) => {
   try {
-    const { image, folder = 'ammardev/uploads' } = req.body;
+    const { image, folder = 'assets' } = req.body;
 
     if (!image) {
       return res.status(400).json({ error: 'No image provided for upload' });
@@ -22,8 +24,12 @@ router.post('/image', async (req, res) => {
       });
     }
 
+    const wsId = req.user?.workspaceId ? String(req.user.workspaceId) : 'common';
+    const cleanSub = folder.replace(/^[\/\\]+|[\/\\]+$/g, '');
+    const isolatedCloudinaryFolder = `ammardev_crm/workspaces/${wsId}/${cleanSub}`;
+
     const uploadResponse = await cloudinary.uploader.upload(image, {
-      folder,
+      folder: isolatedCloudinaryFolder,
       resource_type: 'image',
       transformation: [
         { quality: 'auto:good' },
@@ -37,6 +43,7 @@ router.post('/image', async (req, res) => {
       publicId: uploadResponse.public_id,
       format: uploadResponse.format,
       bytes: uploadResponse.bytes,
+      folder: isolatedCloudinaryFolder,
     });
   } catch (err) {
     console.error('[Cloudinary Upload Error]:', err);

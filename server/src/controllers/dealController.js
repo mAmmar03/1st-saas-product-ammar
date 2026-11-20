@@ -2,10 +2,10 @@ import Deal from '../models/Deal.js';
 import Article from '../models/Article.js';
 import Influencer from '../models/Influencer.js';
 
-// Get all deals with populated fields
+// Get all deals with populated fields (Scoped to current workspace)
 export const getDeals = async (req, res) => {
   try {
-    const deals = await Deal.find()
+    const deals = await Deal.find({ workspaceId: req.user.workspaceId })
       .populate('influencer')
       .populate('prArticles.article')
       .sort({ createdAt: -1 });
@@ -15,7 +15,7 @@ export const getDeals = async (req, res) => {
   }
 };
 
-// Create a new deal / collaboration
+// Create a new deal / collaboration (Scoped to current workspace)
 export const createDeal = async (req, res) => {
   try {
     const {
@@ -36,6 +36,7 @@ export const createDeal = async (req, res) => {
     const finalRatePerVideo = isBarter ? 0 : Number(ratePerVideo || 0);
 
     const newDeal = new Deal({
+      workspaceId: req.user.workspaceId,
       spNumber: spNumber || '',
       influencer,
       campaignName: campaignName || (isBarter ? 'Barter PR Collaboration' : 'PR Collaboration'),
@@ -65,14 +66,14 @@ export const createDeal = async (req, res) => {
   }
 };
 
-// Dispatch a PR article and deduct stock
+// Dispatch a PR article and deduct stock (Scoped to current workspace)
 export const dispatchPRArticle = async (req, res) => {
   try {
     const { dealId, prItemId } = req.params;
     const { courierName, trackingNumber, deliveryNotes, spNumber } = req.body;
 
-    const deal = await Deal.findById(dealId);
-    if (!deal) return res.status(404).json({ error: 'Deal not found' });
+    const deal = await Deal.findOne({ _id: dealId, workspaceId: req.user.workspaceId });
+    if (!deal) return res.status(404).json({ error: 'Deal not found in your workspace' });
 
     const prItem = deal.prArticles.id(prItemId);
     if (!prItem) return res.status(404).json({ error: 'PR item not found in this deal' });
@@ -82,7 +83,7 @@ export const dispatchPRArticle = async (req, res) => {
       return res.status(400).json({ error: 'This PR item has already been dispatched' });
     }
 
-    const article = await Article.findById(prItem.article);
+    const article = await Article.findOne({ _id: prItem.article, workspaceId: req.user.workspaceId });
     if (!article) return res.status(404).json({ error: 'Article not found in inventory' });
 
     // Check available stock
@@ -124,12 +125,12 @@ export const dispatchPRArticle = async (req, res) => {
   }
 };
 
-// Mark PR item as delivered
+// Mark PR item as delivered (Scoped to current workspace)
 export const markPRDelivered = async (req, res) => {
   try {
     const { dealId, prItemId } = req.params;
-    const deal = await Deal.findById(dealId);
-    if (!deal) return res.status(404).json({ error: 'Deal not found' });
+    const deal = await Deal.findOne({ _id: dealId, workspaceId: req.user.workspaceId });
+    if (!deal) return res.status(404).json({ error: 'Deal not found in your workspace' });
 
     const prItem = deal.prArticles.id(prItemId);
     if (!prItem) return res.status(404).json({ error: 'PR item not found' });
@@ -151,8 +152,8 @@ export const markPRDelivered = async (req, res) => {
 export const revertPRDispatch = async (req, res) => {
   try {
     const { dealId, prItemId } = req.params;
-    const deal = await Deal.findById(dealId);
-    if (!deal) return res.status(404).json({ error: 'Deal not found' });
+    const deal = await Deal.findOne({ _id: dealId, workspaceId: req.user.workspaceId });
+    if (!deal) return res.status(404).json({ error: 'Deal not found in your workspace' });
 
     const prItem = deal.prArticles.id(prItemId);
     if (!prItem) return res.status(404).json({ error: 'PR item not found' });
@@ -161,7 +162,7 @@ export const revertPRDispatch = async (req, res) => {
       return res.status(400).json({ error: 'PR item is already pending' });
     }
 
-    const article = await Article.findById(prItem.article);
+    const article = await Article.findOne({ _id: prItem.article, workspaceId: req.user.workspaceId });
     if (article) {
       article.sentPieces = Math.max(0, article.sentPieces - prItem.quantity);
       article.remainingPieces = Math.max(0, article.totalPRQuota - article.sentPieces);
@@ -188,8 +189,8 @@ export const updateVideoDeliverable = async (req, res) => {
     const { dealId, videoId } = req.params;
     const { status, scheduledDate, shootDate, liveUrl, notes } = req.body;
 
-    const deal = await Deal.findById(dealId);
-    if (!deal) return res.status(404).json({ error: 'Deal not found' });
+    const deal = await Deal.findOne({ _id: dealId, workspaceId: req.user.workspaceId });
+    if (!deal) return res.status(404).json({ error: 'Deal not found in your workspace' });
 
     const video = deal.videos.id(videoId);
     if (!video) return res.status(404).json({ error: 'Video item not found' });
@@ -222,8 +223,8 @@ export const updatePayment = async (req, res) => {
     const { dealId } = req.params;
     const { advancePaid, paymentMethod, transactionId, slipImage, status, paymentDate, notes } = req.body;
 
-    const deal = await Deal.findById(dealId);
-    if (!deal) return res.status(404).json({ error: 'Deal not found' });
+    const deal = await Deal.findOne({ _id: dealId, workspaceId: req.user.workspaceId });
+    if (!deal) return res.status(404).json({ error: 'Deal not found in your workspace' });
 
     if (advancePaid !== undefined) {
       deal.payment.advancePaid = Number(advancePaid);
@@ -262,16 +263,16 @@ export const updatePayment = async (req, res) => {
   }
 };
 
-// Delete deal
+// Delete deal (Scoped to workspace)
 export const deleteDeal = async (req, res) => {
   try {
-    const deal = await Deal.findById(req.params.id);
-    if (!deal) return res.status(404).json({ error: 'Deal not found' });
+    const deal = await Deal.findOne({ _id: req.params.id, workspaceId: req.user.workspaceId });
+    if (!deal) return res.status(404).json({ error: 'Deal not found in your workspace' });
 
     // Restore stock if any articles were dispatched in this deal
     for (const prItem of deal.prArticles) {
       if (prItem.dispatchStatus === 'Dispatched' || prItem.dispatchStatus === 'Delivered') {
-        const article = await Article.findById(prItem.article);
+        const article = await Article.findOne({ _id: prItem.article, workspaceId: req.user.workspaceId });
         if (article) {
           article.sentPieces = Math.max(0, article.sentPieces - prItem.quantity);
           article.remainingPieces = Math.max(0, article.totalPRQuota - article.sentPieces);
@@ -287,14 +288,16 @@ export const deleteDeal = async (req, res) => {
   }
 };
 
-// Overview dashboard metrics
+// Overview dashboard metrics (Scoped to current workspace)
 export const getDashboardStats = async (req, res) => {
   try {
-    const totalInfluencers = await Influencer.countDocuments();
-    const totalDeals = await Deal.countDocuments();
+    const wsFilter = { workspaceId: req.user.workspaceId };
+
+    const totalInfluencers = await Influencer.countDocuments(wsFilter);
+    const totalDeals = await Deal.countDocuments(wsFilter);
 
     // PR Stock totals
-    const articles = await Article.find();
+    const articles = await Article.find(wsFilter);
     let totalPRQuota = 0;
     let totalSentPieces = 0;
     let totalRemainingPieces = 0;
@@ -306,7 +309,7 @@ export const getDashboardStats = async (req, res) => {
     });
 
     // Deals financials & deliverables
-    const deals = await Deal.find();
+    const deals = await Deal.find(wsFilter);
     let totalAgreedSpend = 0;
     let totalPaidSpend = 0;
     let totalPendingSpend = 0;

@@ -10,8 +10,11 @@ import {
   deleteDeal,
   getDashboardStats,
 } from '../controllers/dealController.js';
+import { requireAuth } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
+
+router.use(requireAuth);
 
 router.get('/', getDeals);
 router.get('/dashboard-stats', getDashboardStats);

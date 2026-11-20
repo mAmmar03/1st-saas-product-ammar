@@ -8,11 +8,13 @@ import {
   ChevronDown,
   ChevronUp,
   Trash2,
+  Edit,
   TrendingDown,
 } from 'lucide-react';
 import { api } from '../services/api';
 import { useAlert } from '../context/AlertContext';
 import { useRole } from '../context/RoleContext';
+import AddArticleModal from '../components/AddArticleModal';
 
 export default function PRInventory({ onOpenNewArticle, onOpenDossier }) {
   const { showAlert, showConfirm } = useAlert();
@@ -21,6 +23,7 @@ export default function PRInventory({ onOpenNewArticle, onOpenDossier }) {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [expandedArticleId, setExpandedArticleId] = useState(null);
+  const [editingArticle, setEditingArticle] = useState(null);
 
   useEffect(() => {
     loadArticles();
@@ -237,6 +240,14 @@ export default function PRInventory({ onOpenNewArticle, onOpenDossier }) {
                         )}
                       </button>
 
+                      <button
+                        onClick={() => setEditingArticle(art)}
+                        className="p-1.5 text-slate-400 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition shrink-0"
+                        title="Edit article details & quota"
+                      >
+                        <Edit className="w-3.5 h-3.5" />
+                      </button>
+
                       {hasPermission('canDeleteArticles') && (
                         <button
                           onClick={() => handleDelete(art._id, art.name)}
@@ -380,6 +391,18 @@ export default function PRInventory({ onOpenNewArticle, onOpenDossier }) {
             );
           })}
         </div>
+      )}
+
+      {editingArticle && (
+        <AddArticleModal
+          isOpen={Boolean(editingArticle)}
+          articleToEdit={editingArticle}
+          onClose={() => setEditingArticle(null)}
+          onSuccess={() => {
+            setEditingArticle(null);
+            loadArticles();
+          }}
+        />
       )}
     </div>
   );
