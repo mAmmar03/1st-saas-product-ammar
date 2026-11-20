@@ -22,18 +22,18 @@ app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/influencers', influencerRoutes);
-app.use('/api/articles', articleRoutes);
-app.use('/api/deals', dealRoutes);
-app.use('/api/budget', budgetRoutes);
-app.use('/api/settings', settingsRoutes);
-app.use('/api/backup', backupRoutes);
-app.use('/api/upload', uploadRoutes);
+// Routes (Mount on both /api/* and root /* for bulletproof frontend-backend compatibility)
+app.use(['/api/auth', '/auth'], authRoutes);
+app.use(['/api/influencers', '/influencers'], influencerRoutes);
+app.use(['/api/articles', '/articles'], articleRoutes);
+app.use(['/api/deals', '/deals'], dealRoutes);
+app.use(['/api/budget', '/budget'], budgetRoutes);
+app.use(['/api/settings', '/settings'], settingsRoutes);
+app.use(['/api/backup', '/backup'], backupRoutes);
+app.use(['/api/upload', '/upload'], uploadRoutes);
 
 // Health check
-app.get('/api/health', (req, res) => {
+app.get(['/api/health', '/health', '/'], (req, res) => {
   res.json({ status: 'ok', service: 'AmmarDev Influencer CRM Backend', timestamp: new Date() });
 });
 
