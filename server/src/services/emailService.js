@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 
-const defaultSmtpUser = Buffer.from('YW1tYXJkZXYwM0BnbWFpbC5jb20=', 'base64').toString('utf8'); // ammardev03@gmail.com
-const defaultSmtpPass = Buffer.from('ZHRuZ3RiYXpwYW95enZ1dQ==', 'base64').toString('utf8'); // dtngtbazpaoyzvuu
+const defaultSmtpUser = Buffer.from('YW1tYXJkZXYwM0BnbWFpbC5jb20=', 'base64').toString('utf8');
+const defaultSmtpPass = Buffer.from('ZHRuZ3RiYXpwYW95enZ1dQ==', 'base64').toString('utf8');
 
 /**
  * Configure Nodemailer Transport with fast connection timeouts (prevents hanging on blocked ports)
@@ -54,14 +54,42 @@ const getFromAddress = () => {
 /**
  * Universal Email Dispatcher
  * Priority:
- * 1. Brevo HTTP REST API (Port 443 - 100% works on Render without SMTP restrictions)
- * 2. Resend HTTP REST API (Port 443)
+ * 1. Resend HTTP REST API (Port 443 - Fast, secure & works on Render)
+ * 2. Brevo HTTP REST API (Port 443)
  * 3. Nodemailer SMTP (Fast 4s timeout)
  */
 const dispatchHtmlEmail = async ({ to, subject, html }) => {
   const senderEmail = process.env.SMTP_USER || defaultSmtpUser;
+  const resendApiKey = process.env.RESEND_API_KEY;
 
-  // 1. Brevo HTTP API (Port 443 HTTPS - Free 300 emails/day, no credit card required)
+  // 1. Resend HTTP API (Port 443 HTTPS - Enterprise Standard)
+  if (resendApiKey) {
+    try {
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${resendApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: process.env.RESEND_FROM || 'AmmarDev Luxury CRM <onboarding@resend.dev>',
+          to: [to],
+          subject,
+          html,
+        }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        console.log(`[Email Service] ✅ Successfully delivered via Resend HTTP API to ${to}:`, data.id);
+        return { sent: true, provider: 'resend', messageId: data.id };
+      }
+      console.warn(`[Email Service Notice]: Resend API note (${response.status}):`, data.message || data);
+    } catch (err) {
+      console.error('[Email Service Error]: Resend API request failed:', err.message);
+    }
+  }
+
+  // 2. Brevo HTTP API (Port 443 HTTPS - Free 300 emails/day)
   if (process.env.BREVO_API_KEY) {
     try {
       const response = await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -86,33 +114,6 @@ const dispatchHtmlEmail = async ({ to, subject, html }) => {
       console.warn('[Email Service] Brevo API responded with error:', data);
     } catch (err) {
       console.error('[Email Service] Brevo fetch error:', err.message);
-    }
-  }
-
-  // 2. Resend HTTP API (Port 443 HTTPS)
-  if (process.env.RESEND_API_KEY) {
-    try {
-      const response = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: process.env.RESEND_FROM || 'AmmarDev CRM <onboarding@resend.dev>',
-          to: [to],
-          subject,
-          html,
-        }),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        console.log(`[Email Service] ✅ Sent via Resend HTTP API to ${to}:`, data.id);
-        return { sent: true, provider: 'resend', messageId: data.id };
-      }
-      console.warn('[Email Service] Resend API responded with error:', data);
-    } catch (err) {
-      console.error('[Email Service] Resend fetch error:', err.message);
     }
   }
 
