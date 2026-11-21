@@ -175,7 +175,6 @@ export const register = async (req, res) => {
       requiresVerification: true,
       email: cleanEmail,
       username: cleanUsername,
-      devVerificationCode: verificationCode,
     });
   } catch (error) {
     console.error('[Registration Error]:', error);
@@ -222,12 +221,11 @@ export const verifyEmail = async (req, res) => {
       });
     }
 
-    const isCodeValid = user.emailVerificationCode === cleanCode || cleanCode === '9900';
-    if (!isCodeValid) {
-      return res.status(400).json({ error: 'Invalid verification code. Please check your email or enter Master PIN 9900.' });
+    if (!user.emailVerificationCode || user.emailVerificationCode !== cleanCode) {
+      return res.status(400).json({ error: 'Invalid verification code. Please check your email and enter the 6-digit code.' });
     }
 
-    if (user.emailVerificationExpires && user.emailVerificationExpires < new Date() && cleanCode !== '9900') {
+    if (user.emailVerificationExpires && user.emailVerificationExpires < new Date()) {
       return res.status(400).json({ error: 'Verification code has expired. Please request a new code.' });
     }
 
@@ -293,7 +291,6 @@ export const resendVerification = async (req, res) => {
 
     res.json({
       message: `A new 6-digit verification code has been sent to ${cleanEmail}.`,
-      devVerificationCode: newCode,
     });
   } catch (error) {
     res.status(500).json({ error: 'Failed to resend code: ' + error.message });
@@ -420,7 +417,6 @@ export const forgotPassword = async (req, res) => {
     res.json({
       message: `A 6-digit password reset code has been sent to ${cleanEmail}.`,
       email: cleanEmail,
-      devResetCode: resetCode,
     });
   } catch (error) {
     res.status(500).json({ error: 'Failed to process forgot password request: ' + error.message });
@@ -448,12 +444,11 @@ export const resetPassword = async (req, res) => {
       return res.status(404).json({ error: 'No account found with this email.' });
     }
 
-    const isResetCodeValid = user.resetPasswordCode === cleanCode || cleanCode === '9900';
-    if (!isResetCodeValid) {
-      return res.status(400).json({ error: 'Invalid password reset code. Please check your email or enter Master PIN 9900.' });
+    if (!user.resetPasswordCode || user.resetPasswordCode !== cleanCode) {
+      return res.status(400).json({ error: 'Invalid password reset code. Please check your email and enter the 6-digit code.' });
     }
 
-    if (user.resetPasswordExpires && user.resetPasswordExpires < new Date() && cleanCode !== '9900') {
+    if (user.resetPasswordExpires && user.resetPasswordExpires < new Date()) {
       return res.status(400).json({ error: 'Password reset code has expired. Please request a new one.' });
     }
 

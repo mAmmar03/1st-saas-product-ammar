@@ -55,14 +55,12 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
   // Email Verification Fields
   const [verifyEmailAddress, setVerifyEmailAddress] = useState('');
   const [verifyCode, setVerifyCode] = useState('');
-  const [devVerificationCode, setDevVerificationCode] = useState('');
   const [resendCooldown, setResendCooldown] = useState(0);
 
   // Forgot / Reset Password Fields
   const [forgotEmail, setForgotEmail] = useState('');
   const [resetEmailAddress, setResetEmailAddress] = useState('');
   const [resetCode, setResetCode] = useState('');
-  const [devResetCode, setDevResetCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
 
@@ -143,9 +141,6 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
 
       if (res?.requiresVerification) {
         setVerifyEmailAddress(signupEmail);
-        if (res?.devVerificationCode) {
-          setDevVerificationCode(res.devVerificationCode);
-        }
         setMode('verify');
         setSuccess(res.message || 'Workspace created! Enter the 6-digit verification code sent to your email.');
         setResendCooldown(60);
@@ -191,9 +186,6 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
     setResendLoading(true);
     try {
       const res = await resendVerification(verifyEmailAddress);
-      if (res?.devVerificationCode) {
-        setDevVerificationCode(res.devVerificationCode);
-      }
       setSuccess(res.message || 'A new verification code has been sent to your email.');
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to resend verification code. Please check your email.');
@@ -217,9 +209,6 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
     try {
       const res = await forgotPassword(forgotEmail.trim());
       setResetEmailAddress(forgotEmail.trim());
-      if (res?.devResetCode) {
-        setDevResetCode(res.devResetCode);
-      }
       setMode('reset');
       setSuccess(res.message || 'A 6-digit reset code has been sent to your email.');
     } catch (err) {
@@ -695,22 +684,6 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
               <div className="font-bold text-slate-900 text-sm">{verifyEmailAddress}</div>
             </div>
 
-            {devVerificationCode && (
-              <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-slate-700" />
-                  <span>Activation Code: <strong className="font-mono text-slate-900 tracking-wider">{devVerificationCode}</strong></span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setVerifyCode(devVerificationCode)}
-                  className="text-xs font-bold text-slate-900 hover:underline bg-white px-2 py-1 rounded border border-slate-200"
-                >
-                  Auto-Fill
-                </button>
-              </div>
-            )}
-
             <div>
               <label className="block font-semibold text-slate-700 mb-1.5 text-center">
                 Enter 6-Digit Verification Code
@@ -764,10 +737,6 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
               {loading ? 'Verifying Code...' : 'Verify Email & Open Workspace'}
               <ArrowRight className="w-4 h-4" />
             </button>
-
-            <div className="text-center text-[10px] text-slate-400 pt-0.5">
-              Super Admin Bypass: You can also use Master PIN (9900) to activate directly.
-            </div>
           </form>
         )}
 
@@ -827,22 +796,6 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
               <span className="text-[11px] text-slate-500">Reset code sent to</span>
               <div className="font-bold text-slate-900 text-sm">{resetEmailAddress}</div>
             </div>
-
-            {devResetCode && (
-              <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-slate-700" />
-                  <span>Reset Code: <strong className="font-mono text-slate-900 tracking-wider">{devResetCode}</strong></span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setResetCode(devResetCode)}
-                  className="text-xs font-bold text-slate-900 hover:underline bg-white px-2 py-1 rounded border border-slate-200"
-                >
-                  Auto-Fill
-                </button>
-              </div>
-            )}
 
             <div>
               <label className="block font-semibold text-slate-700 mb-1">
@@ -917,10 +870,6 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
               {loading ? 'Updating Password...' : 'Save New Password & Sign In'}
               <ArrowRight className="w-4 h-4" />
             </button>
-
-            <div className="text-center text-[10px] text-slate-400 pt-0.5">
-              Super Admin Bypass: You can also use Master PIN (9900) to reset directly.
-            </div>
 
             <div className="text-center pt-2">
               <button
