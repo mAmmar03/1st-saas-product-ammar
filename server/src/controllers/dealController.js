@@ -187,7 +187,7 @@ export const revertPRDispatch = async (req, res) => {
 export const updateVideoDeliverable = async (req, res) => {
   try {
     const { dealId, videoId } = req.params;
-    const { status, scheduledDate, shootDate, liveUrl, notes } = req.body;
+    const { status, scheduledDate, shootDate, draftDate, liveUrl, notes } = req.body;
 
     const deal = await Deal.findOne({ _id: dealId, workspaceId: req.user.workspaceId });
     if (!deal) return res.status(404).json({ error: 'Deal not found in your workspace' });
@@ -198,6 +198,7 @@ export const updateVideoDeliverable = async (req, res) => {
     if (status) video.status = status;
     if (scheduledDate !== undefined) video.scheduledDate = scheduledDate ? new Date(scheduledDate) : null;
     if (shootDate !== undefined) video.shootDate = shootDate ? new Date(shootDate) : null;
+    if (draftDate !== undefined) video.draftDate = draftDate ? new Date(draftDate) : null;
     if (liveUrl !== undefined) video.liveUrl = liveUrl;
     if (notes !== undefined) video.notes = notes;
 

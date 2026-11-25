@@ -7,6 +7,7 @@ import PRInventory from './pages/PRInventory';
 import InfluencersDirectory from './pages/InfluencersDirectory';
 import CompanyProfile from './pages/CompanyProfile';
 import AlertsCenter from './pages/AlertsCenter';
+import ContentCalendar from './pages/ContentCalendar';
 import LoginScreen from './pages/LoginScreen';
 import LandingPage from './pages/LandingPage';
 import FounderProfile from './pages/FounderProfile';
@@ -50,7 +51,6 @@ function MainApp() {
   };
 
   const [unauthView, setUnauthView] = useState(getInitialUnauthView);
-  const [previewLanding, setPreviewLanding] = useState(false);
 
   const navigateUnauth = (view, replace = false) => {
     setUnauthView(view);
@@ -94,12 +94,9 @@ function MainApp() {
       }
 
       // If Authenticated
-      const validCrmTabs = ['dashboard', 'deals', 'schedule', 'inventory', 'influencers', 'company', 'alerts', 'founder'];
+      const validCrmTabs = ['dashboard', 'deals', 'calendar', 'schedule', 'inventory', 'influencers', 'company', 'alerts', 'founder'];
       if (validCrmTabs.includes(hash)) {
         setActiveTab(hash);
-        setPreviewLanding(false);
-      } else if (hash === 'intro' || hash === 'landing') {
-        setPreviewLanding(true);
       }
     };
 
@@ -320,6 +317,27 @@ function MainApp() {
     }
 
     deal.videos?.forEach((video, vIdx) => {
+      // 1. Draft alerts
+      if (
+        video.draftDate &&
+        video.status !== 'Draft Received' &&
+        video.status !== 'Approved' &&
+        video.status !== 'Video Live'
+      ) {
+        const draftDate = new Date(video.draftDate);
+        draftDate.setHours(0, 0, 0, 0);
+        const draftStr = draftDate.toISOString().split('T')[0];
+        const draftDiffDays = Math.round((draftDate - now) / (1000 * 60 * 60 * 24));
+        const draftAlertId = `draft_${deal._id}_${vIdx}`;
+
+        if (!dismissedAlertIds.includes(draftAlertId)) {
+          if (draftStr === todayStr || (draftDiffDays > 0 && draftDiffDays <= 7) || draftDiffDays < 0) {
+            activeAlertsList.push(draftAlertId);
+          }
+        }
+      }
+
+      // 2. Live reel alerts
       if (video.status === 'Video Live') return;
       if (video.scheduledDate) {
         const schedDate = new Date(video.scheduledDate);
@@ -362,14 +380,10 @@ function MainApp() {
       return;
     }
 
-    if (previewLanding) {
-      document.title = 'SaaS Overview Preview | AmmarDev IRM';
-      return;
-    }
-
     const titles = {
       dashboard: `Dashboard Overview | ${brand} - AmmarDev CRM`,
       deals: `Campaigns & Deals (SP#) | ${brand}`,
+      calendar: `Content Calendar | ${brand}`,
       schedule: `Reel Scheduling Pipeline | ${brand}`,
       inventory: `PR Quotas & Apparel Stock | ${brand}`,
       influencers: `Influencers Directory | ${brand}`,
@@ -379,7 +393,7 @@ function MainApp() {
     };
 
     document.title = titles[activeTab] || `Workspace | ${brand}`;
-  }, [activeTab, unauthView, isAuthenticated, isLocked, previewLanding, brandProfile, alertCount]);
+  }, [activeTab, unauthView, isAuthenticated, isLocked, brandProfile, alertCount]);
 
   const markAlertsAsRead = () => {
     const nowTs = Date.now();
@@ -457,38 +471,6 @@ function MainApp() {
     return <LoginScreen brandProfile={brandProfile} />;
   }
 
-  // Preview Landing Page while logged in
-  if (previewLanding) {
-    return (
-      <div className="min-h-screen bg-white">
-        <div className="bg-slate-900 text-white px-4 py-2 flex items-center justify-between text-xs sticky top-0 z-50 shadow-md">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span className="font-semibold">Live SaaS Intro / Landing Page</span>
-            <span className="text-slate-400 hidden sm:inline">
-              | Active Workspace: {currentUser?.name} ({currentUser?.role === 'super_admin' ? 'Super Admin' : 'Staff'})
-            </span>
-          </div>
-          <button
-            onClick={() => setPreviewLanding(false)}
-            className="px-3 py-1 bg-white text-slate-900 rounded-lg text-xs font-bold hover:bg-slate-100 transition flex items-center gap-1.5 shadow-xs"
-          >
-            <span>Return to Workspace Dashboard</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-        <LandingPage
-          onEnterLogin={() => setPreviewLanding(false)}
-          onOpenFounder={() => {
-            setPreviewLanding(false);
-            setActiveTab('founder');
-          }}
-          brandProfile={brandProfile}
-        />
-      </div>
-    );
-  }
-
   return (
     <div className="h-screen w-screen overflow-hidden flex bg-slate-50 text-slate-800 font-sans antialiased">
       {/* 1. Left Responsive Sidebar (Off-canvas Drawer on Mobile/Tablet, Static on Desktop) */}
@@ -522,7 +504,6 @@ function MainApp() {
         onOpenNewDeal={() => setIsNewDealOpen(true)}
         onOpenNewInfluencer={() => setIsNewInfluencerOpen(true)}
         onOpenNewArticle={() => setIsNewArticleOpen(true)}
-        onPreviewLanding={() => setPreviewLanding(true)}
         onOpenFounder={() => setActiveTab('founder')}
       />
 
@@ -698,6 +679,14 @@ function MainApp() {
             <DealsManager
               key={refreshKey}
               onOpenNewDeal={() => setIsNewDealOpen(true)}
+              onOpenDossier={(id) => setSelectedDossierId(id)}
+            />
+          )}
+
+          {activeTab === 'calendar' && (
+            <ContentCalendar
+              deals={deals}
+              onOpenScheduleModal={(item) => setSchedulingModalItem(item)}
               onOpenDossier={(id) => setSelectedDossierId(id)}
             />
           )}

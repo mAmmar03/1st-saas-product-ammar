@@ -83,7 +83,7 @@ export default function ElevatedSecurityModal({
               type="password"
               required
               autoFocus
-              placeholder="Enter PIN (e.g. 9900) or password..."
+              placeholder="Enter security PIN or password..."
               value={keyInput}
               onChange={(e) => setKeyInput(e.target.value)}
               className="w-full px-3 py-2 border border-slate-300 focus:border-slate-900 focus:outline-none font-mono text-center tracking-widest text-sm"

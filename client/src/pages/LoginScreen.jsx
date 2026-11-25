@@ -50,7 +50,6 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [signupPin, setSignupPin] = useState('9900');
 
   // Email Verification Fields
   const [verifyEmailAddress, setVerifyEmailAddress] = useState('');
@@ -136,7 +135,6 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
         username: signupUsername,
         email: signupEmail,
         password: signupPassword,
-        masterPin: signupPin || '9900',
       });
 
       if (res?.requiresVerification) {
@@ -560,8 +558,6 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
                 {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                 <span>{showPassword ? 'Hide Passwords' : 'Show Passwords'}</span>
               </button>
-
-              <span className="text-[11px] text-slate-400">Master PIN Default: 9900</span>
             </div>
 
             <button

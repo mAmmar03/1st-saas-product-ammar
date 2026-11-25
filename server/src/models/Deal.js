@@ -58,6 +58,9 @@ const videoItemSchema = new mongoose.Schema({
   shootDate: {
     type: Date,
   },
+  draftDate: {
+    type: Date, // Scheduled/expected draft date from influencer
+  },
   status: {
     type: String,
     enum: ['Pending', 'Draft Received', 'Approved', 'Video Live'],

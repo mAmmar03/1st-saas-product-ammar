@@ -11,6 +11,9 @@ export default function ScheduleReelModal({ deal, videoItem, onClose, onSuccess 
   const [shootDate, setShootDate] = useState(
     videoItem?.shootDate ? new Date(videoItem.shootDate).toISOString().split('T')[0] : ''
   );
+  const [draftDate, setDraftDate] = useState(
+    videoItem?.draftDate ? new Date(videoItem.draftDate).toISOString().split('T')[0] : ''
+  );
   const [notes, setNotes] = useState(videoItem?.notes || '');
   const [loading, setLoading] = useState(false);
 
@@ -24,9 +27,10 @@ export default function ScheduleReelModal({ deal, videoItem, onClose, onSuccess 
       await api.updateVideo(deal._id, videoItem._id, {
         scheduledDate: scheduledDate || null,
         shootDate: shootDate || null,
+        draftDate: draftDate || null,
         notes,
       });
-      showAlert('Reel shoot & live target dates saved successfully!', 'success');
+      showAlert('Reel schedule & draft target dates saved successfully!', 'success');
       if (onSuccess) onSuccess();
       onClose();
     } catch (err) {
@@ -80,6 +84,24 @@ export default function ScheduleReelModal({ deal, videoItem, onClose, onSuccess 
             />
             <span className="text-[11px] text-slate-400 block mt-1">
               The date agreed with influencer to shoot the dresses
+            </span>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
+              <span>Expected Video Draft Date (Optional)</span>
+              <span className="text-[10px] text-violet-700 font-medium bg-violet-50 px-1.5 py-0.5 rounded border border-violet-100">
+                Draft Alert Tracked
+              </span>
+            </label>
+            <input
+              type="date"
+              value={draftDate}
+              onChange={(e) => setDraftDate(e.target.value)}
+              className="w-full px-3.5 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none text-xs transition"
+            />
+            <span className="text-[11px] text-slate-400 block mt-1">
+              Date influencer is scheduled to submit the video draft for review
             </span>
           </div>
 

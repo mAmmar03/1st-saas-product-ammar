@@ -470,13 +470,13 @@ export default function SecurityCenterModal({ isOpen, onClose }) {
                 <input
                   type="text"
                   maxLength={6}
-                  placeholder="e.g. 9900"
+                  placeholder="Enter 4-digit PIN"
                   value={newMasterPin}
                   onChange={(e) => setNewMasterPin(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none text-xs tracking-wider transition"
                 />
                 <span className="text-[11px] text-slate-400 block mt-1">
-                  Leave blank to retain existing master PIN (default: 9900).
+                  Leave blank to retain existing master security PIN.
                 </span>
               </div>
 

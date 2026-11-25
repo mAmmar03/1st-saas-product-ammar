@@ -5,6 +5,7 @@ import {
   Package,
   Users,
   Video,
+  Calendar,
   Plus,
   Bell,
   Building2,
@@ -53,6 +54,7 @@ export default function Sidebar({
   const allNavItems = [
     { id: 'dashboard', label: 'Dashboard Overview', icon: LayoutDashboard, perm: 'canAccessDashboard' },
     { id: 'deals', label: 'Campaigns & Deals', icon: FileSpreadsheet, perm: 'canAccessDeals' },
+    { id: 'calendar', label: 'Content Calendar', icon: Calendar, perm: 'canAccessSchedule' },
     { id: 'schedule', label: 'Reel Scheduling', icon: Video, perm: 'canAccessSchedule' },
     { id: 'inventory', label: 'PR Articles & Quotas', icon: Package, perm: 'canAccessInventory' },
     { id: 'influencers', label: 'Influencer Profiles', icon: Users, perm: 'canAccessInfluencers' },
@@ -282,41 +284,38 @@ export default function Sidebar({
                 <span>Backup & Export</span>
               </button>
             )}
-
-            {onPreviewLanding && (
-              <button
-                onClick={() => handleAction(onPreviewLanding)}
-                className="w-full flex items-center gap-2.5 px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 rounded-md transition"
-                title="Preview the SaaS Public Landing Page"
-              >
-                <Sparkles className="w-4 h-4 text-slate-500 shrink-0" />
-                <span>SaaS Landing Page</span>
-              </button>
-            )}
-
-            {onOpenFounder && (
-              <button
-                onClick={() => handleAction(onOpenFounder)}
-                className="w-full flex items-center justify-between px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 rounded-md transition"
-                title="Founder & Lead Systems Architect (Muhammad Ammar)"
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className="w-4 h-4 rounded-full overflow-hidden shrink-0 border border-slate-300">
-                    <img
-                      src="https://res.cloudinary.com/dh6td7vhx/image/upload/v1786349109/ammar-profile1_socote.png"
-                      alt="Muhammad Ammar"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <span>Founder Profile</span>
-                </div>
-                <span className="text-[9px] font-mono bg-slate-100 text-slate-600 px-1.5 py-0.2 rounded font-semibold">
-                  Ammar
-                </span>
-              </button>
-            )}
           </div>
         </div>
+
+        {/* Founder & Lead Systems Architect Card (Prominently placed above Quick Actions) */}
+        {onOpenFounder && (
+          <div className="px-3 pb-2 pt-1 border-t border-slate-100">
+            <button
+              onClick={() => handleAction(onOpenFounder)}
+              className="w-full flex items-center justify-between p-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition active:scale-[0.98] shadow-subtle group"
+              title="Founder & Lead Systems Architect (Muhammad Ammar)"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-7 h-7 rounded-lg overflow-hidden shrink-0 border border-slate-700 bg-slate-800">
+                  <img
+                    src="https://res.cloudinary.com/dh6td7vhx/image/upload/v1786349109/ammar-profile1_socote.png"
+                    alt="Muhammad Ammar"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="text-left min-w-0">
+                  <span className="text-[11px] font-bold text-white block leading-tight truncate">
+                    Muhammad Ammar
+                  </span>
+                  <span className="text-[9px] text-slate-300 block leading-tight truncate">
+                    Founder & Systems Architect
+                  </span>
+                </div>
+              </div>
+              <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform shrink-0" />
+            </button>
+          </div>
+        )}
 
         {/* Quick Actions & Session Lock Footer */}
         <div className="p-3 border-t border-slate-200/80 space-y-2 bg-slate-50/40">
