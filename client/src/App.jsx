@@ -283,14 +283,17 @@ function MainApp() {
   const loadGlobalData = async () => {
     try {
       const [brandRes, dealsRes, artRes, budgetRes] = await Promise.all([
-        api.getBrandProfile(),
-        api.getDeals(),
-        api.getArticles(),
+        api.getBrandProfile().catch((err) => {
+          console.error('Brand profile load error:', err);
+          return { data: null };
+        }),
+        api.getDeals().catch(() => ({ data: [] })),
+        api.getArticles().catch(() => ({ data: [] })),
         api.getBudgetOverview().catch(() => ({ data: null })),
       ]);
-      setBrandProfile(brandRes.data || {});
-      setDeals(dealsRes.data || []);
-      setArticles(artRes.data || []);
+      if (brandRes?.data) setBrandProfile(brandRes.data);
+      if (dealsRes?.data) setDeals(dealsRes.data);
+      if (artRes?.data) setArticles(artRes.data);
       if (budgetRes?.data) setBudgetOverview(budgetRes.data);
     } catch (e) {
       console.error('Error fetching global data', e);
@@ -360,7 +363,7 @@ function MainApp() {
 
   // Dynamic Document Title & Browser Tab Brand Synchronization
   useEffect(() => {
-    const brand = brandProfile?.brandName || 'Stylish Collection';
+    const brand = brandProfile?.brandName || (currentUser?.name ? `${currentUser.name}'s Brand` : 'Brand Workspace');
 
     if (!isAuthenticated) {
       if (unauthView === 'landing') {
@@ -781,6 +784,7 @@ function MainApp() {
         isOpen={isBrandSettingsOpen}
         onClose={() => setIsBrandSettingsOpen(false)}
         onSuccess={triggerRefresh}
+        brandProfile={brandProfile}
       />
 
       <DataBackupModal

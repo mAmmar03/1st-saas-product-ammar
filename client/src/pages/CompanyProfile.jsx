@@ -24,8 +24,8 @@ export default function CompanyProfile({
 }) {
   const { isSuperAdmin, hasPermission } = useRole();
 
-  const brandName = brandProfile?.brandName || 'Stylish Collection';
-  const tagline = brandProfile?.tagline || 'Luxury Pret & Formal Festive Collection';
+  const brandName = brandProfile?.brandName || 'Brand Workspace';
+  const tagline = brandProfile?.tagline || 'Luxury Pret & Influencer PR Management';
 
   // Aggregate stats for this company
   let totalDressesSent = 0;

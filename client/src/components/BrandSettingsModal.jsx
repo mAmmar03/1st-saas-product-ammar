@@ -3,26 +3,29 @@ import { X, Building2, Camera, Trash2, Check, AlertCircle } from 'lucide-react';
 import { api } from '../services/api';
 import { useAlert } from '../context/AlertContext';
 
-export default function BrandSettingsModal({ isOpen, onClose, onSuccess }) {
+export default function BrandSettingsModal({ isOpen, onClose, onSuccess, brandProfile }) {
   const { showAlert } = useAlert();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    brandName: 'Stylish Collection',
-    tagline: 'Luxury Pret & Festive Collection',
-    brandLogo: '',
-    phone: '',
-    email: '',
-    city: 'Lahore, Pakistan',
-    address: '',
-    instagramHandle: '@stylishcollection',
-    authorizedSignatory: 'Ammar / PR Manager',
+    brandName: brandProfile?.brandName || '',
+    tagline: brandProfile?.tagline || 'Luxury Pret & Influencer PR Management',
+    brandLogo: brandProfile?.brandLogo || '',
+    phone: brandProfile?.phone || '',
+    email: brandProfile?.email || '',
+    city: brandProfile?.city || 'Lahore, Pakistan',
+    address: brandProfile?.address || '',
+    instagramHandle: brandProfile?.instagramHandle || '',
+    authorizedSignatory: brandProfile?.authorizedSignatory || 'Super Admin',
   });
 
   useEffect(() => {
     if (isOpen) {
+      if (brandProfile) {
+        setFormData((prev) => ({ ...prev, ...brandProfile }));
+      }
       loadBrandProfile();
     }
-  }, [isOpen]);
+  }, [isOpen, brandProfile]);
 
   const loadBrandProfile = async () => {
     try {
@@ -150,7 +153,7 @@ export default function BrandSettingsModal({ isOpen, onClose, onSuccess }) {
               <input
                 type="text"
                 required
-                placeholder="e.g. Stylish Collection"
+                placeholder="e.g. Sohni Pret, Khaadi, Zara"
                 value={formData.brandName}
                 onChange={(e) => setFormData({ ...formData, brandName: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none font-semibold text-sm transition"
@@ -192,7 +195,7 @@ export default function BrandSettingsModal({ isOpen, onClose, onSuccess }) {
               </label>
               <input
                 type="text"
-                placeholder="@stylishcollection"
+                placeholder="@yourbrand"
                 value={formData.instagramHandle}
                 onChange={(e) => setFormData({ ...formData, instagramHandle: e.target.value })}
                 className="w-full px-3.5 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none text-xs transition"
@@ -220,7 +223,7 @@ export default function BrandSettingsModal({ isOpen, onClose, onSuccess }) {
               </label>
               <input
                 type="text"
-                placeholder="e.g. Ammar / PR Manager"
+                placeholder="e.g. Muhammad Ammar (Super Admin)"
                 value={formData.authorizedSignatory}
                 onChange={(e) => setFormData({ ...formData, authorizedSignatory: e.target.value })}
                 className="w-full px-3.5 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none text-xs transition"

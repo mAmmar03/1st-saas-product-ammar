@@ -130,7 +130,7 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
     setLoading(true);
     try {
       const res = await register({
-        brandName: brandName || 'Stylish Collection',
+        brandName: brandName?.trim() || (signupName ? `${signupName.trim()}'s Brand` : 'Brand Workspace'),
         name: fullName,
         username: signupUsername,
         email: signupEmail,
@@ -451,7 +451,7 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Stylish Collection"
+                    placeholder="e.g. Sohni Pret, Khaadi, Zara"
                     value={brandName}
                     onChange={(e) => setBrandName(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none"

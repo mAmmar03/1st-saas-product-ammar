@@ -76,7 +76,7 @@ export default function PaymentReceiptModal({ deal, onClose, onRefresh }) {
 
   // Copy structured text summary for WhatsApp sharing
   const handleCopyWhatsAppText = () => {
-    const brandName = brandProfile?.brandName || 'Stylish Collection';
+    const brandName = brandProfile?.brandName || 'Brand Workspace';
     const isBarter = deal.dealType === 'Barter PR';
 
     const text = isBarter
@@ -124,7 +124,7 @@ Thank you for collaborating with ${brandName}!`;
     );
   };
 
-  const brandName = brandProfile?.brandName || 'Stylish Collection';
+  const brandName = brandProfile?.brandName || 'Brand Workspace';
   const tagline = brandProfile?.tagline || 'Luxury Pret & Formal Collection';
 
   return (

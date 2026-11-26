@@ -67,7 +67,7 @@ export default function Sidebar({
     return hasPermission(item.perm);
   });
 
-  const brandName = brandProfile?.brandName || 'Stylish Collection';
+  const brandName = brandProfile?.brandName || 'Brand Workspace';
 
   const handleNavClick = (tabId) => {
     setActiveTab(tabId);

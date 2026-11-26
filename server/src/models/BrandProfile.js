@@ -10,12 +10,12 @@ const brandProfileSchema = new mongoose.Schema(
     },
     brandName: {
       type: String,
-      default: 'Stylish Collection',
+      default: 'Brand Workspace',
       trim: true,
     },
     tagline: {
       type: String,
-      default: 'Luxury Pret & Festive Collection',
+      default: 'Luxury Pret & Influencer PR Management',
       trim: true,
     },
     brandLogo: {
@@ -24,11 +24,11 @@ const brandProfileSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
-      default: '0300 0000000',
+      default: '',
     },
     email: {
       type: String,
-      default: 'info@stylishcollection.com',
+      default: '',
     },
     city: {
       type: String,
@@ -40,11 +40,11 @@ const brandProfileSchema = new mongoose.Schema(
     },
     instagramHandle: {
       type: String,
-      default: '@stylishcollection',
+      default: '',
     },
     authorizedSignatory: {
       type: String,
-      default: 'Ammar / PR Manager',
+      default: 'Super Admin',
     },
     adminPermissions: {
       canDeleteDeals: { type: Boolean, default: false },

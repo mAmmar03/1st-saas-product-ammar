@@ -80,7 +80,7 @@ export default function WeeklyPRSheetModal({ isOpen, onClose }) {
   const handlePrint = () => {
     printDocument(
       'weekly-pr-print-area',
-      `${brandProfile?.brandName || 'Stylish Collection'} - Weekly PR Audit Sheet`
+      `${brandProfile?.brandName || 'Brand Workspace'} - Weekly PR Audit Sheet`
     );
   };
 
@@ -157,7 +157,7 @@ export default function WeeklyPRSheetModal({ isOpen, onClose }) {
                 )}
                 <div>
                   <h1 className="text-base sm:text-lg font-black uppercase tracking-tight text-zinc-900">
-                    {brandProfile?.brandName || 'Stylish Collection'}
+                    {brandProfile?.brandName || 'Brand Workspace'}
                   </h1>
                   <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">
                     {brandProfile?.tagline || 'Influencer PR & Marketing Commercials Sheet'}

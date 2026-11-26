@@ -40,49 +40,10 @@ const generateSixDigitCode = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-// Helper to ensure default Super Admin exists for legacy root compatibility
+// Production multi-tenant mode: zero dummy accounts seeded.
+// Each client workspace creates their authentic brand account on registration.
 export const initDefaultUsers = async () => {
-  try {
-    const superAdmin = await User.findOne({ role: 'super_admin' });
-    if (!superAdmin) {
-      const salt = await bcrypt.genSalt(10);
-      const passwordHash = await bcrypt.hash('AmmarDev@Super2026!', salt);
-      const masterPinHash = await bcrypt.hash('9900', salt);
-
-      const defaultUser = await User.create({
-        username: 'superadmin',
-        name: 'Muhammad Ammar (Super Admin)',
-        email: 'ammar@ammardev.com',
-        passwordHash,
-        masterPinHash,
-        role: 'super_admin',
-        isEmailVerified: true,
-        isActive: true,
-      });
-
-      const defaultWorkspace = await Workspace.create({
-        name: 'Stylish Collection Workspace',
-        slug: 'stylish-collection',
-        owner: defaultUser._id,
-        status: 'active',
-      });
-
-      defaultUser.workspaceId = defaultWorkspace._id;
-      await defaultUser.save();
-
-      await BrandProfile.create({
-        workspaceId: defaultWorkspace._id,
-        brandName: 'Stylish Collection',
-        tagline: 'Luxury Pret & Festive Collection',
-        email: 'ammar@ammardev.com',
-        authorizedSignatory: 'Muhammad Ammar (Super Admin)',
-      });
-
-      console.log('[Security] Super Admin initialized: superadmin / AmmarDev@Super2026! (Master PIN: 9900)');
-    }
-  } catch (error) {
-    console.error('[Security] Error initializing default accounts:', error);
-  }
+  return;
 };
 
 // 0. Brand Workspace Registration / Sign-Up Endpoint

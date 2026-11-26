@@ -8,18 +8,10 @@ import PRBudget from '../models/PRBudget.js';
 
 export const ensureWorkspaceIsolation = async () => {
   try {
-    // 1. Find or create default workspace for legacy/seed data
-    let defaultWorkspace = await Workspace.findOne();
-    const superAdmin = await User.findOne({ role: 'super_admin' });
-
-    if (!defaultWorkspace && superAdmin) {
-      defaultWorkspace = await Workspace.create({
-        name: 'Stylish Collection Workspace',
-        slug: 'stylish-collection',
-        owner: superAdmin._id,
-        status: 'active',
-      });
-      console.log('[Multi-Tenancy] Created default workspace:', defaultWorkspace._id);
+    const defaultWorkspace = await Workspace.findOne();
+    if (!defaultWorkspace) {
+      // Clean slate - ready for fresh brand registrations
+      return;
     }
 
     if (defaultWorkspace) {
