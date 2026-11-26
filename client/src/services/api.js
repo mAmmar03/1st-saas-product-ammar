@@ -93,8 +93,8 @@ export const api = {
   deleteBudget: (id) => client.delete(`/budget/${id}`),
 
   // Brand / Company Profile Settings
-  getBrandProfile: () => client.get('/settings/brand'),
-  updateBrandProfile: (data) => client.put('/settings/brand', data),
+  getBrandProfile: () => client.get('/settings'),
+  updateBrandProfile: (data) => client.put('/settings', data),
 
   // Backup & Migration
   exportBackup: () => client.get('/backup/export'),

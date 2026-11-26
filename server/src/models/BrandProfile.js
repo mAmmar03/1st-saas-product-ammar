@@ -32,7 +32,7 @@ const brandProfileSchema = new mongoose.Schema(
     },
     city: {
       type: String,
-      default: 'Lahore, Pakistan',
+      default: '',
     },
     address: {
       type: String,

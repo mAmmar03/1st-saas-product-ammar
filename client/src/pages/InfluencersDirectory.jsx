@@ -127,7 +127,7 @@ export default function InfluencersDirectory({ onOpenNewInfluencer, onOpenDossie
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search by name, handle (@Faiqawaseem30), city, or dress size..."
+            placeholder="Search by creator name, @handle, city, or dress size..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full text-xs pl-10 pr-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none transition"

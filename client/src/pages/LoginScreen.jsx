@@ -451,7 +451,7 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Sohni Pret, Khaadi, Zara"
+                    placeholder="e.g. Acme Apparel, Stellar Studio"
                     value={brandName}
                     onChange={(e) => setBrandName(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none"
@@ -468,7 +468,7 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Muhammad Ammar"
+                    placeholder="e.g. Alex Morgan / Brand Owner"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none"
@@ -487,7 +487,7 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
                   <input
                     type="text"
                     required
-                    placeholder="e.g. ammar or admin"
+                    placeholder="e.g. brand_admin"
                     value={signupUsername}
                     onChange={(e) => setSignupUsername(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none"
@@ -504,7 +504,7 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
                   <input
                     type="email"
                     required
-                    placeholder="ammar@brand.com"
+                    placeholder="owner@domain.com"
                     value={signupEmail}
                     onChange={(e) => setSignupEmail(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none"
@@ -597,7 +597,7 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
                   type="text"
                   required
                   autoFocus
-                  placeholder="e.g. superadmin or your username"
+                  placeholder="Enter username or email address"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none transition"
@@ -753,7 +753,7 @@ export default function LoginScreen({ brandProfile, onBackToLanding, initialMode
                   type="email"
                   required
                   autoFocus
-                  placeholder="ammar@brand.com"
+                  placeholder="name@company.com"
                   value={forgotEmail}
                   onChange={(e) => setForgotEmail(e.target.value)}
                   className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none transition"

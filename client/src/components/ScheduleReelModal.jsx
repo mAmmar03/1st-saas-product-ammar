@@ -127,7 +127,7 @@ export default function ScheduleReelModal({ deal, videoItem, onClose, onSuccess 
             </label>
             <input
               type="text"
-              placeholder="e.g. Creator will tag @stylishcollection and link in bio"
+              placeholder="e.g. Creator will tag official brand handle and link in bio"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="w-full px-3.5 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none text-xs transition"

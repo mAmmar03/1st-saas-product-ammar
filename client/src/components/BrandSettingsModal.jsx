@@ -8,11 +8,11 @@ export default function BrandSettingsModal({ isOpen, onClose, onSuccess, brandPr
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     brandName: brandProfile?.brandName || '',
-    tagline: brandProfile?.tagline || 'Luxury Pret & Influencer PR Management',
+    tagline: brandProfile?.tagline || '',
     brandLogo: brandProfile?.brandLogo || '',
     phone: brandProfile?.phone || '',
     email: brandProfile?.email || '',
-    city: brandProfile?.city || 'Lahore, Pakistan',
+    city: brandProfile?.city || '',
     address: brandProfile?.address || '',
     instagramHandle: brandProfile?.instagramHandle || '',
     authorizedSignatory: brandProfile?.authorizedSignatory || 'Super Admin',
@@ -153,7 +153,7 @@ export default function BrandSettingsModal({ isOpen, onClose, onSuccess, brandPr
               <input
                 type="text"
                 required
-                placeholder="e.g. Sohni Pret, Khaadi, Zara"
+                placeholder="e.g. Acme Apparel"
                 value={formData.brandName}
                 onChange={(e) => setFormData({ ...formData, brandName: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none font-semibold text-sm transition"
@@ -166,7 +166,7 @@ export default function BrandSettingsModal({ isOpen, onClose, onSuccess, brandPr
               </label>
               <input
                 type="text"
-                placeholder="e.g. Luxury Pret & Festive Collection"
+                placeholder="e.g. Premium Fashion & Lifestyle"
                 value={formData.tagline}
                 onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
                 className="w-full px-3.5 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none text-xs transition"
@@ -182,7 +182,7 @@ export default function BrandSettingsModal({ isOpen, onClose, onSuccess, brandPr
               </label>
               <input
                 type="text"
-                placeholder="0300 0000000"
+                placeholder="+92 300 1234567"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 className="w-full px-3.5 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none text-xs transition"
@@ -195,7 +195,7 @@ export default function BrandSettingsModal({ isOpen, onClose, onSuccess, brandPr
               </label>
               <input
                 type="text"
-                placeholder="@yourbrand"
+                placeholder="@brandhandle"
                 value={formData.instagramHandle}
                 onChange={(e) => setFormData({ ...formData, instagramHandle: e.target.value })}
                 className="w-full px-3.5 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none text-xs transition"
@@ -210,7 +210,7 @@ export default function BrandSettingsModal({ isOpen, onClose, onSuccess, brandPr
               </label>
               <input
                 type="text"
-                placeholder="e.g. Lahore, Pakistan"
+                placeholder="City, Country"
                 value={formData.city}
                 onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                 className="w-full px-3.5 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none text-xs transition"
@@ -223,7 +223,7 @@ export default function BrandSettingsModal({ isOpen, onClose, onSuccess, brandPr
               </label>
               <input
                 type="text"
-                placeholder="e.g. Muhammad Ammar (Super Admin)"
+                placeholder="e.g. Brand Director / PR Lead"
                 value={formData.authorizedSignatory}
                 onChange={(e) => setFormData({ ...formData, authorizedSignatory: e.target.value })}
                 className="w-full px-3.5 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none text-xs transition"
@@ -237,7 +237,7 @@ export default function BrandSettingsModal({ isOpen, onClose, onSuccess, brandPr
             </label>
             <textarea
               rows={2}
-              placeholder="Warehouse / Studio Address for return PR parcels"
+              placeholder="Office / Warehouse dispatch address for PR parcels"
               value={formData.address}
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
               className="w-full px-3.5 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-slate-900 focus:outline-none text-xs transition"
